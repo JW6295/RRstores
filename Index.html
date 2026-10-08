@@ -1,0 +1,1395 @@
+<!doctype html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><script type='text/javascript' nonce='ZBTaKZyb9i/p2LaH/OBU+g==' src='https://a202a708-a9f2-48ef-b0b2-ddbc8f87c78e.frame.claudeusercontent.com/yWs_FFw7_c2_o_F2IVWXwITNuMduQ-ZZ4dohuo3QC6dYmvJjqRzAQL9XnFTbLV03yPlGTKVfdQXfo9hk2ymzFV4jtLC7WK5g6bJnSNC3bPjZZvXejmpks338px6_Li4nY0FyEDOGEw6G_8pYzpm5rIpA5XIFrR_DMjafpaEdUz4LZ99xaf_5TyLhU6vwZXToWVSY2B7eUcrDaZOxjxIkBDLlhDihP3LSe3yGA7PIO1dDzMnerO1DG2rMuSnFceyE10EYi9je3GJaWQhxQalD0rSzWRQMka4IpLisVdPQUCBok6K-kBUj1XlqM4KmmLuhiUOerlGEdBK1CFr3yNY5dHU8fdNtvDt2YqAkC6TzogFocaHiSv8xZFdYOgsbe11DEAm0Zs58T7sGgmbgaZi6-a1qOa6Cufnw0sQOPNSV-WMOlMjSGdiOrGDMi92nLZ3svDxIqgshgG_HBX4yZWewt-6ltzTSPJQsths0WTd9FdxscJ5llU1O3oELnh0QfNbyRHZbKEIB9fP59m_PdKELlxdhKBcLS3xxoTA-6rljKvf0vEEJ46g5feYmpj-lgP3yt6TccKl67Inl9Po2gfKjlR3n0zzg8Up1J-NSgC0kAA92mpLjWc8V62nnAVXwgMHKw2qUHc07FcWSjNG4h0eRxz95x4yNFKHrQhcveWifnKOU10ThbXN4WfYqNk9tUM2wOFQFm7TnKBR03U3IDx5nvA'></script></head><body>
+<title>Spares Log</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+/* Layout: one narrow column built for a thumb on the shop floor. The label viewfinder is the loudest thing on the page; everything else stays quiet and tappable. */
+:root{
+  --bg:#E6E9EC; --surface:#F1F3F5; --raised:#FFFFFF; --ink:#12171C; --muted:#56626C; --line:#C5CCD2;
+  --accent:#0A58A6; --accent-ink:#FFFFFF; --accent-soft:#D6E5F4;
+  --ok:#17703F; --warn:#965600; --danger:#B3261E; --scrim:rgba(18,23,28,.55);
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101419; --surface:#161C22; --raised:#1D252C; --ink:#E7ECF0; --muted:#92A0AB; --line:#2B353E;
+    --accent:#5BA8F2; --accent-ink:#071421; --accent-soft:#1B2E42;
+    --ok:#4CC27F; --warn:#E3A33B; --danger:#F0776F; --scrim:rgba(0,0,0,.65); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101419; --surface:#161C22; --raised:#1D252C; --ink:#E7ECF0; --muted:#92A0AB; --line:#2B353E;
+  --accent:#5BA8F2; --accent-ink:#071421; --accent-soft:#1B2E42;
+  --ok:#4CC27F; --warn:#E3A33B; --danger:#F0776F; --scrim:rgba(0,0,0,.65); color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 var(--f-body);padding-inline:16px;padding-block:0 24px;-webkit-text-size-adjust:100%}
+.wrap{max-width:640px;margin-inline:auto}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* header + tabs */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin-inline:-16px;padding:12px 16px 0;border-bottom:1px solid var(--line)}
+.top-in{max-width:640px;margin-inline:auto}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{margin:0;font:700 24px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase}
+.mode{font:500 12px var(--f-mono);color:var(--muted);text-align:right}
+.mode.local{color:var(--warn)}
+.views{display:flex;gap:22px;margin-top:6px}
+.view-tab{background:none;border:0;border-bottom:3px solid transparent;padding:10px 0 8px;font:600 17px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.view-tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+/* sections */
+.sec{display:grid;gap:12px;padding-block:18px;border-bottom:1px solid var(--line)}
+.sec[hidden]{display:none}
+.lab{font:600 14px var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.lab small{font:400 13px var(--f-body);letter-spacing:0;text-transform:none;margin-left:6px}
+.note{margin:0;font-size:14px;color:var(--muted)}
+.banner{margin:14px 0 0;padding:10px 12px;border:1px solid var(--warn);border-radius:var(--r);font-size:14px;color:var(--ink);background:var(--surface)}
+
+/* scan viewfinder */
+.scan-frame{position:relative;aspect-ratio:16/10;max-width:100%;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
+.scan-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scan-empty{padding:0 36px;text-align:center}
+.scan-title{margin:0 0 4px;font:600 22px var(--f-display);letter-spacing:.08em;text-transform:uppercase}
+.scan-hint{margin:0;font-size:14px;color:var(--muted)}
+.c{position:absolute;width:28px;height:28px;border:0 solid var(--accent);pointer-events:none}
+.c.tl{top:10px;left:10px;border-top-width:4px;border-left-width:4px}
+.c.tr{top:10px;right:10px;border-top-width:4px;border-right-width:4px}
+.c.bl{bottom:10px;left:10px;border-bottom-width:4px;border-left-width:4px}
+.c.br{bottom:10px;right:10px;border-bottom-width:4px;border-right-width:4px}
+.scan-actions{display:flex;gap:10px}
+.scan-actions .btn.primary{flex:1}
+.status{margin:0;min-height:1.4em;font-size:14px;color:var(--muted)}
+.status.warn{color:var(--warn)}
+.status.ok{color:var(--ok)}
+
+/* buttons */
+.btn{min-height:48px;padding:0 18px;border:1px solid var(--line);background:var(--raised);color:var(--ink);font:600 16px var(--f-body);border-radius:var(--r)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{min-height:40px;padding:0 12px;font-size:15px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;padding:6px 0;font-size:14px;font-weight:600;color:var(--accent);text-decoration:underline;white-space:nowrap}
+.row2{display:flex;flex-wrap:wrap;gap:10px}
+.row2 .btn{flex:1 1 150px}
+
+/* fields */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+.field{display:grid;gap:6px;min-width:0}
+.field label{font-size:14px;font-weight:600;color:var(--muted)}
+input,textarea{width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--line);background:var(--raised);color:var(--ink);font:inherit;border-radius:var(--r)}
+textarea{min-height:76px;resize:vertical}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.8}
+select{width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--line);background:var(--raised);color:var(--ink);font:inherit;border-radius:var(--r)}
+select:disabled{opacity:.55}
+input[type="checkbox"]{width:24px;height:24px;min-height:0;padding:0;accent-color:var(--accent);flex:none}
+.mono{font-family:var(--f-mono);letter-spacing:.02em}
+#partNo{font-size:18px;font-weight:600}
+details summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);padding:4px 0}
+details .grid{margin-top:10px}
+.check{display:flex;align-items:center;gap:12px;min-height:48px;font-size:16px}
+.check[hidden]{display:none}
+
+.qty{display:grid;grid-template-columns:48px minmax(64px,96px) 48px;gap:8px;align-items:center}
+.qty input{text-align:center;font-family:var(--f-mono);font-size:18px}
+.qty .btn{padding:0;font-size:22px}
+
+/* segmented + chips */
+.seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:8px}
+.seg.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg button,.tab{min-height:48px;padding:0 8px;border:1px solid var(--line);background:var(--raised);border-radius:var(--r);font:600 16px var(--f-body);text-align:center}
+.seg.three button{font-size:15px}
+.seg button[aria-pressed="true"],.tab[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(46%,120px),1fr));gap:8px}
+.tab{font:600 16px var(--f-display);letter-spacing:.08em;text-transform:uppercase}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 14px;border:1px solid var(--line);background:var(--raised);border-radius:4px;font:500 15px var(--f-body);display:inline-flex;align-items:center}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.chip.add{border-style:dashed;color:var(--accent);background:transparent;font-weight:600}
+.cnt{margin-left:8px;padding:1px 6px;border-radius:3px;background:var(--accent-soft);color:var(--ink);font:600 13px var(--f-mono)}
+.chip[aria-pressed="true"] .cnt{background:var(--accent-ink);color:var(--accent)}
+.group{margin:8px 0 0;font:600 13px var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.addrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px}
+.addloc{display:grid;gap:10px;padding:12px;border:1px dashed var(--line);border-radius:var(--r)}
+.addloc[hidden]{display:none}
+.empty{margin:0;padding:14px;border:1px dashed var(--line);border-radius:var(--r);font-size:14px;color:var(--muted)}
+
+/* stores-list finder + part notice */
+.find{display:grid;gap:6px}
+.find-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:baseline;text-align:left;min-height:56px;padding:10px 12px;border:1px solid var(--line);background:var(--raised);border-radius:var(--r)}
+.f-no{font:600 16px var(--f-mono);overflow-wrap:anywhere}
+.f-sub{grid-column:1;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.f-stock{grid-column:2;grid-row:1 / span 2;text-align:right;font:600 16px var(--f-mono)}
+.f-stock small{display:block;font:400 12px var(--f-body);color:var(--muted)}
+.f-stock.zero{color:var(--danger)}
+.picked{margin:0;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--ok);border-radius:var(--r);background:var(--surface);font-size:14px}
+.picked[hidden]{display:none}
+.sub{margin-top:6px;padding-top:14px;border-top:1px dashed var(--line);display:grid;gap:12px}
+
+/* specification rows */
+.specrows{display:grid;gap:10px}
+.spec{display:grid;grid-template-columns:minmax(76px,32%) minmax(0,1fr) 44px;gap:8px;align-items:center}
+.spec label{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.spec .x{min-height:44px;border:1px solid var(--line);background:var(--raised);border-radius:var(--r);font-size:20px;line-height:1}
+
+/* action bar */
+.bar{position:sticky;bottom:0;margin-inline:-16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line)}
+.bar-in{max-width:640px;margin-inline:auto;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
+.hint{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.hint.ready{color:var(--ink);font-weight:500}
+.bar .btn{min-width:128px;min-height:52px;font-size:17px}
+
+/* history + stores lists */
+.tools{display:grid;gap:10px;padding-block:16px 6px}
+.sum{margin:0;font:500 13px var(--f-mono);color:var(--muted)}
+.day{margin:0;padding-top:20px;font:600 14px var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.entry{display:grid;gap:3px;padding:14px 0;border-bottom:1px solid var(--line)}
+.e-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.e-part{min-width:0;overflow-wrap:anywhere;font:600 17px var(--f-mono)}
+.e-qty{flex:none;font:600 16px var(--f-mono)}
+.e-desc{margin:0;overflow-wrap:anywhere}
+.e-meta{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:14px;color:var(--muted)}
+.tag{font:600 12px var(--f-display);letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border:1px solid var(--line);border-radius:3px;color:var(--ink)}
+.tag.stores{border-color:var(--accent);color:var(--accent)}
+.tag.in{border-color:var(--ok);color:var(--ok)}
+.tag.warn{border-color:var(--warn);color:var(--warn)}
+.e-foot{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:13px;color:var(--muted)}
+.rm{background:none;border:0;padding:6px 0;font-size:13px;color:var(--muted);text-decoration:underline}
+.rm.sure{color:var(--danger);font-weight:600}
+
+.part{border-bottom:1px solid var(--line)}
+.part-head{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:start;text-align:left;background:none;border:0;padding:14px 0}
+.p-no{font:600 17px var(--f-mono);overflow-wrap:anywhere}
+.p-sub,.p-spec{grid-column:1;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.p-spec{color:var(--ink)}
+.p-stock{grid-column:2;grid-row:1 / span 3;text-align:right;font:600 22px var(--f-mono);line-height:1.1}
+.p-stock small{display:block;font:400 12px var(--f-body);color:var(--muted)}
+.p-stock.zero{color:var(--danger)}
+.p-body{display:grid;gap:12px;padding:0 0 18px}
+dl.specs{margin:0;display:grid;grid-template-columns:minmax(90px,34%) minmax(0,1fr);gap:4px 12px;font-size:15px}
+dl.specs dt{color:var(--muted)}
+dl.specs dd{margin:0;overflow-wrap:anywhere}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.srow b{display:block;overflow-wrap:anywhere}
+.srow small{display:block;color:var(--muted);font-size:13px}
+.srow small.stale{color:var(--warn);font-weight:600}
+.srow .sq{font:600 20px var(--f-mono)}
+
+/* sheet */
+.scrim{position:fixed;inset:0;z-index:20;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
+.scrim[hidden]{display:none}
+.sheet{width:100%;max-width:640px;max-height:92%;overflow:auto;background:var(--bg);border-top:1px solid var(--line);padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));display:grid;gap:14px}
+.sheet h2{margin:0;font:700 24px/1.1 var(--f-display);letter-spacing:.06em;text-transform:uppercase}
+.sheet h2:focus{outline:none}
+.sheet p{margin:0}
+.sheet .part-line{font:600 16px var(--f-mono);overflow-wrap:anywhere}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:30;max-width:calc(100% - 32px);padding:12px 16px;background:var(--ink);color:var(--bg);border-radius:var(--r);font-weight:600;font-size:15px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <h1>Spares Log</h1>
+      <span class="mode" id="mode">connecting…</span>
+    </div>
+    <div class="views" role="tablist" aria-label="Views">
+      <button class="view-tab" role="tab" id="tab-log" data-act="view" data-v="log" aria-selected="true">Log a part</button>
+      <button class="view-tab" role="tab" id="tab-stores" data-act="view" data-v="stores" aria-selected="false">Stores</button>
+      <button class="view-tab" role="tab" id="tab-history" data-act="view" data-v="history" aria-selected="false">History</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="banner" id="banner" hidden=""></p>
+  <datalist id="areaList"></datalist>
+
+  <!-- LOG A PART -->
+  <main id="view-log">
+    <section class="sec" aria-label="Source and quantity">
+      <div class="lab">What are you doing?</div>
+      <div class="seg three" id="source"></div>
+      <div class="lab">Quantity</div>
+      <div class="qty">
+        <button type="button" class="btn" data-act="qty" data-v="-1" aria-label="One fewer">−</button>
+        <input id="qty" type="number" inputmode="numeric" min="1" max="999" value="1" aria-label="Quantity">
+        <button type="button" class="btn" data-act="qty" data-v="1" aria-label="One more">+</button>
+      </div>
+      <label class="check" id="reuseRow" for="reusable" hidden=""><input type="checkbox" id="reusable"> Reusable. Put it in the stores.</label>
+    </section>
+
+    <section class="sec" id="sec-dept" aria-label="Department">
+      <div class="lab">Department</div>
+      <div class="field"><select id="dept" aria-label="Department"></select></div>
+    </section>
+
+    <section class="sec" id="sec-machine" aria-label="Machine">
+      <div class="lab" id="machineLab">Machine</div>
+      <div class="field"><select id="machine" aria-label="Machine"></select></div>
+      <div class="addrow" id="addRow" hidden="">
+        <input id="newMachine" placeholder="New machine name" aria-label="New machine name" autocomplete="off" autocapitalize="words">
+        <button type="button" class="btn primary" data-act="savemachine">Add</button>
+        <button type="button" class="btn" data-act="cancelmachine">Cancel</button>
+      </div>
+    </section>
+
+    <section class="sec" aria-label="Component type">
+      <div class="lab">Type of component</div>
+      <div class="field"><label for="cat">Category</label><select id="cat"></select></div>
+      <div class="field"><label for="item">Component</label><select id="item"></select></div>
+      <div class="field" id="addComp" hidden="">
+        <label for="newComp" id="newCompLab">Add a component</label>
+        <div class="addrow">
+          <input id="newComp" placeholder="e.g. Thermal overload" autocomplete="off" autocapitalize="sentences">
+          <button type="button" class="btn primary" data-act="savecomp">Add</button>
+          <button type="button" class="btn" data-act="cancelcomp">Cancel</button>
+        </div>
+      </div>
+      <div class="field" id="otherWrap" hidden=""><label for="otherText">Describe the component type</label><input id="otherText" autocomplete="off" placeholder="e.g. Thermal overload"></div>
+    </section>
+
+    <section class="sec" id="sec-part" aria-label="Part details">
+      <div class="lab">Part</div>
+      <div class="field"><label for="pfind">Find it in the stores list</label><input id="pfind" type="search" placeholder="Search part number, maker, spec" autocomplete="off"></div>
+      <div class="find" id="find"></div>
+      <p class="picked" id="picked" hidden=""></p>
+
+      <div class="sub">
+        <div class="lab">Details <small>scan the label or type them in</small></div>
+        <div class="scan-frame" id="scanFrame">
+          <img id="scanImg" alt="Photo of the part label" hidden="">
+          <div class="scan-empty" id="scanEmpty">
+            <p class="scan-title">Scan part label</p>
+            <p class="scan-hint">Fill the frame with the label. Manufacturer, part number and serial are read for you.</p>
+          </div>
+          <span class="c tl"></span><span class="c tr"></span><span class="c bl"></span><span class="c br"></span>
+        </div>
+        <div class="scan-actions">
+          <button type="button" class="btn primary" id="scanBtn" data-act="scan">Scan label</button>
+          <button type="button" class="btn" id="scanStop" data-act="stop" hidden="">Stop</button>
+        </div>
+        <p class="status" id="scanStatus" role="status"></p>
+        <input id="photo" type="file" accept="image/*" capture="environment" hidden="">
+
+        <div class="grid">
+          <div class="field"><label for="mfr">Manufacturer</label><input id="mfr" autocomplete="off" autocapitalize="words" placeholder="e.g. Siemens"></div>
+          <div class="field"><label for="partNo">Part number</label><input id="partNo" class="mono" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="From the label"></div>
+        </div>
+        <div class="field"><label for="desc">Description</label><input id="desc" autocomplete="off" placeholder="What is it?"></div>
+        <details id="more">
+          <summary>Order number and serial</summary>
+          <div class="grid">
+            <div class="field"><label for="orderNo">Order / stores number</label><input id="orderNo" class="mono" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+            <div class="field"><label for="serial">Serial / batch</label><input id="serial" class="mono" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+          </div>
+        </details>
+      </div>
+
+      <div class="sub">
+        <div class="lab">Specification <small>tap to add what is on the label</small></div>
+        <div class="field"><select id="specAdd" aria-label="Add a specification"></select></div>
+        <div class="addrow" id="addSpec" hidden="">
+          <input id="newSpec" placeholder="Spec name, e.g. Coil voltage" aria-label="Spec name" autocomplete="off" autocapitalize="sentences">
+          <button type="button" class="btn primary" data-act="savespec">Add</button>
+          <button type="button" class="btn" data-act="cancelspec">Cancel</button>
+        </div>
+        <div class="specrows" id="specRows"></div>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-loc" aria-label="Location">
+      <div class="lab" id="locLab">Location</div>
+      <div id="locs"></div>
+      <div class="addloc" id="addLoc-form" hidden=""></div>
+    </section>
+
+    <section class="sec" aria-label="Job details">
+      <div class="lab">Job <small>optional</small></div>
+      <div class="field"><label for="job">Job or work order number</label><input id="job" class="mono" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
+      <div class="field"><label for="note">Notes</label><textarea id="note" placeholder="Why was it needed? Fault found, replaced like for like, etc."></textarea></div>
+    </section>
+
+    <div class="bar" id="bar">
+      <div class="bar-in">
+        <div class="hint" id="hint">Pick a department</div>
+        <button type="button" class="btn primary" id="logBtn" data-act="log" disabled="">Log part</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- STORES -->
+  <main id="view-stores" hidden="">
+    <div class="tools">
+      <input id="sSearch" type="search" placeholder="Search part number, maker, spec, location" aria-label="Search the stores list" autocomplete="off">
+      <select id="afilter" aria-label="Area"></select>
+      <label class="check" for="needsCheck"><input type="checkbox" id="needsCheck"> Only parts needing a stock check</label>
+      <p class="sum" id="ssum"></p>
+      <div class="row2">
+        <button type="button" class="btn primary" data-act="receive">Add part to stores</button>
+        <button type="button" class="btn" id="exportStock" data-act="exportstock" hidden="">Export stores list</button>
+      </div>
+    </div>
+    <div id="plist"></div>
+  </main>
+
+  <!-- HISTORY -->
+  <main id="view-history" hidden="">
+    <div class="tools">
+      <input id="hq" type="search" placeholder="Search part number, machine, location, description" aria-label="Search the log" autocomplete="off">
+      <div class="seg" id="hfilter"></div>
+      <p class="sum" id="sum"></p>
+      <button type="button" class="btn" id="exportBtn" data-act="export" hidden="">Export CSV</button>
+    </div>
+    <div id="list"></div>
+  </main>
+</div>
+
+<div class="scrim" id="scrim" hidden="">
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div id="sheetBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden=""></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- config ---------- */
+const DEPTS = ['DSFT','DCDD','Systems','Instruments','Services'];
+const STALE_DAYS = 90;
+
+const TYPES = [
+  {id:'electrical', name:'Electrical', groups:[{name:'', items:[
+    'Power supply','Relay','Contactor','Circuit breaker / MCB','Fuse','Overload relay','Terminal / terminal block',
+    'Connector / plug','Cable','Switch / push button','Indicator lamp','Proximity sensor','Limit switch',
+    'Solenoid coil','Motor','Servo drive / inverter','PLC / I/O module','Transformer','Encoder'
+  ]}]},
+  {id:'mechanical', name:'Mechanical', groups:[
+    {name:'Pneumatic', items:['Air fitting','Air hose / tube','Valve','Cylinder','Regulator / FRL unit','Silencer']},
+    {name:'Hydraulic', items:['Hydraulic fitting','Hose','Pump','Valve','Cylinder','Filter','Seal kit']},
+    {name:'Drive and motion', items:['Bearing','Belt','Coupling','Ball screw','Linear guide','Gearbox','Spindle part']},
+    {name:'Lubrication and coolant', items:['Lube pump','Coolant pump','Coolant nozzle','Coolant / lube filter']},
+    {name:'Seals and fixings', items:['Seal / O-ring','Fastener','Spring','Gasket']},
+    {name:'Tooling', items:['Tool holder','Collet','Pull stud']}
+  ]},
+  {id:'systems', name:'Systems', groups:[{name:'', items:[
+    'Controller / CNC','HMI / screen','Network / Ethernet','Computer / PC','Backup battery','Communication module','Software / licence'
+  ]}]},
+  {id:'instruments', name:'Instruments', groups:[{name:'', items:[
+    'Pressure gauge','Pressure transducer','Temperature sensor','Flow meter','Level sensor','Load cell',
+    'Touch probe','Transmitter','Calibrated gauge / tool'
+  ]}]}
+];
+
+/* spec suggestions: [name, example value] */
+const SPEC_SETS = {
+  generic:[['Voltage','24 V DC'],['Current','10 A'],['Power','240 W'],['Pressure','0–10 bar'],['Flow','20 l/min'],['Size','M8 × 1.25']],
+  electrical:[['Voltage','24 V DC'],['Current','10 A'],['Power','240 W'],['Frequency','50 Hz'],['Coil voltage','24 V DC'],['Contacts / poles','2 NO + 2 NC'],['IP rating','IP20']],
+  mechanical:[['Pressure','0–10 bar'],['Flow','20 l/min'],['Port / thread','G1/4'],['Bore / stroke','32 / 100 mm'],['Size','M8 × 1.25'],['Material','Stainless steel'],['Temp range','-20 to 80 °C']],
+  systems:[['Model / version','v2.4'],['Voltage','24 V DC'],['Interface','Profinet'],['Firmware / software','v2.4'],['Capacity','8 GB']],
+  instruments:[['Range','0–16 bar'],['Output signal','4–20 mA'],['Accuracy','±0.5 %'],['Supply voltage','24 V DC'],['Connection','G1/2'],['Temp range','-40 to 125 °C']]
+};
+const HINT_MAP = {};
+Object.keys(SPEC_SETS).forEach(k => SPEC_SETS[k].forEach(([n,e]) => { if(!HINT_MAP[n]) HINT_MAP[n] = e; }));
+
+/* used only when the shared database is not available */
+const SEED_LOCS = [['Stores buildings','Stores building 1'],['Stores buildings','Stores building 2']]
+  .concat([1,2,3,4].map(n => ['Hermle cupboards','Hermle cupboard ' + n]))
+  .concat([1,2,3,4].map(n => ['Heylig cupboards','Heylig cupboard ' + n]))
+  .concat([1,2,3,4].map(n => ['DMG cupboards','DMG cupboard ' + n]));
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const use = n => (window.claude && window.claude.use) ? window.claude.use(n).catch(() => null) : Promise.resolve(null);
+const slug = n => String(n).trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || ('m-' + Date.now().toString(36));
+const norm = s => String(s == null ? '' : s).trim().toLowerCase().replace(/\s+/g,' ');
+const natural = (a,b) => String(a).localeCompare(String(b), undefined, {numeric:true, sensitivity:'base'});
+const pad = n => String(n).padStart(2,'0');
+const timeFmt = ts => { const d = new Date(ts); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const dayKey = ts => { const d = new Date(ts); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); };
+const dayLabel = ts => {
+  const k = dayKey(ts), now = Date.now();
+  if(k === dayKey(now)) return 'Today';
+  if(k === dayKey(now - 864e5)) return 'Yesterday';
+  return new Date(ts).toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short', year:'numeric'});
+};
+const isStale = ts => !ts || (Date.now() - ts) > STALE_DAYS * 864e5;
+function ago(ts){
+  if(!ts) return 'never checked';
+  const d = Math.floor((Date.now() - ts) / 864e5);
+  if(d < 1) return 'checked today';
+  if(d < 14) return 'checked ' + d + ' d ago';
+  if(d < 60) return 'checked ' + Math.round(d / 7) + ' wk ago';
+  return 'checked ' + Math.round(d / 30) + ' mo ago';
+}
+
+/* ---------- state ---------- */
+const prefs = LS.get('spares-log-prefs', {});
+const S = {
+  view:'log',
+  source: ['machine','stores','in'].includes(prefs.source) ? prefs.source : 'machine',
+  dept: DEPTS.includes(prefs.dept) ? prefs.dept : '',
+  machine: typeof prefs.machine === 'string' ? prefs.machine : '',
+  cat:'', group:'', item:'', specs:[], partId:'', loc:'', reusable:false, addTarget:null,
+  machines:[], custom:[], locs:[], parts:[], stock:[], logs:[], logsLoaded:false,
+  names:{}, uid:null, user:null,
+  mode:'pending', canWrite:true, error:'',
+  hfilter:'all', hq:'', sSearch:'', aFilter:'all', needsCheck:false, openPart:'',
+  sheet:null,
+  sample:null, imgOk:null, scanning:false, ctl:null,
+  downloads:null, saving:false, confirmRm:''
+};
+let store = null;
+let photoUrl = '';
+
+/* ---------- small lookups ---------- */
+const val = id => $('#'+id).value.trim();
+const locById = id => S.locs.find(l => l.id === id);
+const locName = id => { const l = locById(id); return l ? l.name : 'Unknown location'; };
+const locArea = id => { const l = locById(id); return l ? l.area : ''; };
+const stockRow = (pid, lid) => S.stock.find(s => s.partId === pid && s.locId === lid);
+const partText = p => [p.partNo,p.mfr,p.desc,p.orderNo,p.item,p.group,p.cat,(p.specs||[]).map(s => s.k + ' ' + s.v).join(' ')].join(' ').toLowerCase();
+const itemText = () => S.item === 'Other' ? val('otherText') : S.item;
+const needsLoc = () => S.source !== 'machine' || S.reusable;
+function stockMap(){ const m = {}; S.stock.forEach(s => { (m[s.partId] = m[s.partId] || []).push(s); }); return m; }
+function currentPart(){
+  if(S.partId){ const p = S.parts.find(x => x.id === S.partId); if(p) return p; }
+  const pn = norm(val('partNo')); if(!pn) return null;
+  const mf = norm(val('mfr'));
+  return S.parts.find(p => norm(p.partNo) === pn && (!mf || !p.mfr || norm(p.mfr) === mf)) || null;
+}
+function specList(p){ return (p.specs || []).filter(s => s && s.k && s.v); }
+
+/* ---------- render: log form ---------- */
+const opt = (v, t, on) => '<option value="'+esc(v)+'"'+(on ? ' selected' : '')+'>'+esc(t)+'</option>';
+function chip(act, v, on, extra){
+  return '<button type="button" class="chip" data-act="'+act+'" data-v="'+esc(v)+'"'+(extra!==undefined?' data-g="'+esc(extra)+'"':'')+' aria-pressed="'+(on?'true':'false')+'">'+esc(v)+'</button>';
+}
+function renderSource(){
+  $('#source').innerHTML =
+    '<button type="button" data-act="source" data-v="machine" aria-pressed="'+(S.source==='machine')+'">From machine</button>'+
+    '<button type="button" data-act="source" data-v="stores" aria-pressed="'+(S.source==='stores')+'">From stores</button>'+
+    '<button type="button" data-act="source" data-v="in" aria-pressed="'+(S.source==='in')+'">Into stores</button>';
+  $('#machineLab').innerHTML = S.source === 'machine' ? 'Which machine?' : 'Fitted to which machine? <small>optional</small>';
+  renderMachines();
+  $('#sec-dept').hidden = S.source === 'in';
+  $('#sec-machine').hidden = S.source === 'in';
+  $('#reuseRow').hidden = S.source !== 'machine';
+  $('#reusable').checked = S.reusable;
+  $('#sec-loc').hidden = !needsLoc();
+  renderLocs();
+}
+function renderDepts(){
+  $('#dept').innerHTML = opt('', 'Select department…', !S.dept) + DEPTS.map(d => opt(d, d, S.dept === d)).join('');
+}
+function renderMachines(){
+  const ph = S.source === 'machine' ? 'Select machine…' : 'No machine (optional)';
+  let h = opt('', ph, !S.machine) + S.machines.map(m => opt(m.name, m.name, S.machine === m.name)).join('');
+  if(S.machine && !S.machines.some(m => m.name === S.machine)) h += opt(S.machine, S.machine, true);
+  $('#machine').innerHTML = h + '<optgroup label="Not listed">' + opt('__add', '+ Add a machine…', false) + '</optgroup>';
+}
+function itemsFor(cat, g){
+  const list = g.items.slice();
+  const seen = new Set(list.map(x => x.toLowerCase()));
+  S.custom.filter(c => c.cat === cat.id && (c.group || '') === g.name)
+    .sort((a,b) => a.name.localeCompare(b.name))
+    .forEach(c => { if(!seen.has(c.name.toLowerCase())){ seen.add(c.name.toLowerCase()); list.push(c.name); } });
+  return list;
+}
+function renderTypes(){
+  $('#cat').innerHTML = opt('', 'Select category…', !S.cat) + TYPES.map(c => opt(c.id, c.name, S.cat === c.id)).join('');
+  const cat = TYPES.find(c => c.id === S.cat), sel = $('#item');
+  if(!cat){
+    sel.innerHTML = opt('', 'Choose a category first', true); sel.disabled = true;
+  } else {
+    sel.disabled = false;
+    const cur = S.item === 'Other' ? '__other' : (S.item ? S.group + '::' + S.item : '');
+    let h = opt('', 'Select component…', !cur);
+    cat.groups.forEach(g => {
+      const items = itemsFor(cat, g).map(it => opt(g.name + '::' + it, it, cur === g.name + '::' + it)).join('') +
+        opt('__add::' + g.name, '+ Add' + (g.name ? ' to ' + g.name : ' a component') + '…', false);
+      h += g.name ? '<optgroup label="'+esc(g.name)+'">' + items + '</optgroup>' : items;
+    });
+    h += '<optgroup label="Not listed">' + opt('__other', 'Other…', cur === '__other') + '</optgroup>';
+    sel.innerHTML = h;
+  }
+  $('#otherWrap').hidden = S.item !== 'Other';
+}
+
+/* part finder + notice */
+function renderFind(){
+  const q = norm($('#pfind').value);
+  let list = S.parts.slice();
+  let hint = '';
+  if(q){
+    list = list.filter(p => partText(p).includes(q));
+  } else if(S.cat){
+    const it = S.item && S.item !== 'Other' ? S.item : '';
+    list = list.filter(p => p.cat === S.cat && (!it || (p.item === it && (p.group || '') === S.group)));
+  } else {
+    list = [];
+    hint = S.parts.length ? 'Pick a type above, or search the whole stores list.' : 'The stores list is empty. Enter the part details below and it will be added.';
+  }
+  if(!hint && !list.length) hint = q ? 'Nothing in the stores list matches. Enter the details below.' : 'Nothing of this type in the stores list yet. Enter the details below and it will be added.';
+  const sm = stockMap();
+  list.sort((a,b) => natural(a.partNo || a.desc || '', b.partNo || b.desc || ''));
+  const shown = list.slice(0, 6);
+  let html = shown.map(p => {
+    const total = (sm[p.id] || []).reduce((a,r) => a + r.qty, 0);
+    const sub = [p.mfr, p.desc].filter(Boolean).join(' · ');
+    return '<button type="button" class="find-row" data-act="usepart" data-v="'+esc(p.id)+'">'+
+      '<span class="f-no">'+esc(p.partNo || p.desc || 'No part number')+'</span>'+
+      '<span class="f-sub">'+esc(sub || p.item || '')+'</span>'+
+      '<span class="f-stock'+(total ? '' : ' zero')+'">'+total+'<small>in stock</small></span></button>';
+  }).join('');
+  if(list.length > shown.length) html += '<p class="note">'+(list.length - shown.length)+' more. Type in the search box to narrow it down.</p>';
+  if(hint) html += '<p class="empty">'+esc(hint)+'</p>';
+  $('#find').innerHTML = html;
+}
+function renderPicked(){
+  const el = $('#picked'), cp = currentPart();
+  if(!cp){ el.hidden = true; return; }
+  const rows = S.stock.filter(s => s.partId === cp.id);
+  const total = rows.reduce((a,r) => a + r.qty, 0);
+  const linked = S.partId === cp.id;
+  el.hidden = false;
+  el.innerHTML = '<span><b>In the stores list.</b> '+total+' in stock'+(rows.length ? ' across '+rows.length+' location'+(rows.length > 1 ? 's' : '') : '')+'.</span>'+
+    (linked ? '<button type="button" class="link" data-act="clearpart">Clear</button>'
+            : '<button type="button" class="link" data-act="usepart" data-v="'+esc(cp.id)+'">Use its details</button>');
+}
+function usePart(id){
+  const p = S.parts.find(x => x.id === id); if(!p) return;
+  S.partId = p.id;
+  const c = TYPES.find(t => t.id === p.cat);
+  if(c){
+    const g = c.groups.find(x => x.name === (p.group || ''));
+    S.cat = c.id;
+    if(p.item && g && itemsFor(c, g).includes(p.item)){ S.group = g.name; S.item = p.item; }
+    else if(p.item){ S.group = ''; S.item = 'Other'; $('#otherText').value = p.item; }
+    else { S.group = ''; S.item = ''; }
+  }
+  $('#mfr').value = p.mfr || ''; $('#partNo').value = p.partNo || ''; $('#orderNo').value = p.orderNo || '';
+  $('#desc').value = p.desc || ''; $('#serial').value = '';
+  if(p.orderNo) $('#more').open = true;
+  S.specs = specList(p).map(s => ({k:s.k, v:s.v}));
+  $('#pfind').value = '';
+  renderTypes(); renderSpecs(); renderFind(); renderPicked(); renderLocs(); renderBar();
+}
+function clearPart(){
+  S.partId = '';
+  ['mfr','partNo','orderNo','desc','serial'].forEach(id => { $('#'+id).value = ''; });
+  S.specs = [];
+  clearPhoto();
+  renderSpecs(); renderFind(); renderPicked(); renderLocs(); renderBar();
+}
+function onPartInput(){
+  if(S.partId){ const p = S.parts.find(x => x.id === S.partId); if(p && norm(p.partNo) !== norm(val('partNo'))) S.partId = ''; }
+  renderPicked(); renderLocs(); renderBar();
+}
+
+/* specification */
+function specHints(){ return SPEC_SETS[S.cat] || SPEC_SETS.generic; }
+function renderSpecs(focusIdx){
+  const have = k => S.specs.some(s => s.k === k);
+  $('#specAdd').innerHTML = opt('', 'Add a specification…', true) +
+    specHints().filter(h => !have(h[0])).map(h => opt(h[0], h[0], false)).join('') +
+    '<optgroup label="Not listed">' + opt('__other', '+ Other…', false) + '</optgroup>';
+  $('#specRows').innerHTML = S.specs.map((s,i) =>
+    '<div class="spec"><label for="spec'+i+'">'+esc(s.k)+'</label>'+
+    '<input id="spec'+i+'" data-i="'+i+'" value="'+esc(s.v)+'" placeholder="'+esc('e.g. ' + (HINT_MAP[s.k] || ''))+'" autocomplete="off">'+
+    '<button type="button" class="x" data-act="rmspec" data-v="'+i+'" aria-label="Remove '+esc(s.k)+'">×</button></div>').join('');
+  if(focusIdx !== undefined){ const el = $('#spec'+focusIdx); if(el) el.focus(); }
+}
+
+/* location chips, used on the form and in the sheet */
+function locSelectHtml(id, sel, partId, opts){
+  opts = opts || {};
+  const rows = partId ? S.stock.filter(s => s.partId === partId) : [];
+  const cnt = lid => { const r = rows.find(x => x.locId === lid); return r ? r.qty : null; };
+  const o = (l, on) => { const n = cnt(l.id); return opt(l.id, l.name + (n != null ? ' — ' + n + ' in stock' : ''), on); };
+  const locs = S.locs.filter(l => l.id !== opts.exclude);
+  let h = opt('', S.locs.length ? 'Select location…' : 'No locations yet', !sel);
+  if(opts.holding && rows.length){
+    const held = locs.filter(l => cnt(l.id) != null);
+    if(held.length) h += '<optgroup label="Has stock">' + held.map(l => o(l, false)).join('') + '</optgroup>';
+  }
+  Array.from(new Set(locs.map(l => l.area))).forEach(a => {
+    h += '<optgroup label="'+esc(a)+'">' + locs.filter(l => l.area === a).map(l => o(l, sel === l.id)).join('') + '</optgroup>';
+  });
+  h += '<optgroup label="Not listed">' + opt('__add', '+ Add a location…', false) + '</optgroup>';
+  return '<div class="field"><select id="'+id+'" aria-label="Location">' + h + '</select></div>';
+}
+function addLocHtml(ctx){
+  return '<div class="field"><label for="locArea-'+ctx+'">Area</label><input id="locArea-'+ctx+'" list="areaList" placeholder="e.g. Hermle cupboards" autocomplete="off"></div>'+
+    '<div class="field"><label for="locName-'+ctx+'">Location name</label><input id="locName-'+ctx+'" placeholder="e.g. Hermle cupboard 5" autocomplete="off"></div>'+
+    '<div class="row2"><button type="button" class="btn primary" data-act="saveloc" data-ctx="'+ctx+'">Add location</button>'+
+    '<button type="button" class="btn" data-act="cancelloc" data-ctx="'+ctx+'">Cancel</button></div>';
+}
+function renderLocs(){
+  const cp = currentPart();
+  $('#locs').innerHTML = locSelectHtml('loc', S.loc, cp ? cp.id : '', {holding:S.source === 'stores'});
+  $('#locLab').textContent = S.source === 'stores' ? 'Taken from which location?' : S.source === 'in' ? 'Which location is it going into?' : 'Put it in which location?';
+  $('#areaList').innerHTML = Array.from(new Set(S.locs.map(l => l.area))).map(a => '<option value="'+esc(a)+'">').join('');
+}
+
+function missing(){
+  if(!S.canWrite) return 'You can view this log but not add to it';
+  if(S.source !== 'in' && !S.dept) return 'Pick a department';
+  if(S.source === 'machine' && !S.machine) return 'Pick the machine';
+  if(!S.cat || !S.item) return 'Pick the type of component';
+  if(!itemText()) return 'Describe the component type';
+  if(!(val('partNo') || val('desc') || val('mfr'))) return 'Pick a part, scan the label or enter its details';
+  if(needsLoc() && !S.loc) return 'Pick the location';
+  if(!(Number(val('qty')) >= 1)) return 'Quantity must be at least 1';
+  return '';
+}
+function renderBar(){
+  const m = missing(), hint = $('#hint');
+  const part = val('partNo') || val('desc') || val('mfr');
+  hint.className = 'hint' + (m ? '' : ' ready');
+  const where = S.source === 'in' ? 'into ' + locName(S.loc) : (S.machine || 'Stores') + ' · ' + S.dept;
+  hint.textContent = m || (part + ' · ' + where);
+  $('#logBtn').disabled = !!m || S.saving;
+  $('#logBtn').textContent = S.source === 'in' ? 'Add to stores' : 'Log part';
+}
+function renderAll(){
+  renderSource(); renderDepts(); renderMachines(); renderTypes(); renderFind(); renderPicked(); renderSpecs(); renderBar();
+}
+
+/* ---------- render: mode + banner ---------- */
+function renderMode(){
+  const el = $('#mode');
+  if(S.mode === 'shared'){ el.textContent = 'Shared log'; el.className = 'mode'; }
+  else if(S.mode === 'local'){ el.textContent = 'This device only'; el.className = 'mode local'; }
+  else { el.textContent = 'Connecting…'; el.className = 'mode'; }
+  const b = $('#banner');
+  let msg = S.error;
+  if(!msg && S.mode === 'local') msg = 'Entries are saved on this phone only. Open the shared link while signed in to log for everyone.';
+  b.hidden = !msg; b.textContent = msg || '';
+}
+
+/* ---------- render: stores ---------- */
+function renderStores(){
+  const sm = stockMap();
+  const areas = Array.from(new Set(S.locs.map(l => l.area))).sort(natural);
+  if(S.aFilter !== 'all' && !areas.includes(S.aFilter)) S.aFilter = 'all';
+  $('#afilter').innerHTML = opt('all', 'All areas', S.aFilter === 'all') + areas.map(a => opt(a, a, S.aFilter === a)).join('');
+  $('#exportStock').hidden = !(S.downloads && S.parts.length);
+
+  const q = norm(S.sSearch);
+  let totalUnits = 0, staleRows = 0;
+  S.stock.forEach(r => { totalUnits += r.qty; if(isStale(r.chk)) staleRows++; });
+  const list = S.parts.filter(p => {
+    const rows = sm[p.id] || [];
+    if(S.aFilter !== 'all' && !rows.some(r => locArea(r.locId) === S.aFilter)) return false;
+    if(S.needsCheck && !rows.some(r => isStale(r.chk))) return false;
+    if(q && !(partText(p) + ' ' + rows.map(r => locName(r.locId) + ' ' + locArea(r.locId)).join(' ').toLowerCase()).includes(q)) return false;
+    return true;
+  }).sort((a,b) => natural(a.partNo || a.desc || '', b.partNo || b.desc || ''));
+
+  $('#ssum').textContent = S.parts.length + ' parts · ' + totalUnits + ' units · ' + staleRows + ' count' + (staleRows === 1 ? '' : 's') + ' to check' +
+    (list.length !== S.parts.length ? ' · ' + list.length + ' shown' : '');
+  if(!S.parts.length){ $('#plist').innerHTML = '<p class="empty">The stores list is empty. Add a part to the stores, or log a part from a machine, and it will appear here.</p>'; return; }
+  if(!list.length){ $('#plist').innerHTML = '<p class="empty">No parts match.</p>'; return; }
+
+  $('#plist').innerHTML = list.map(p => {
+    const rows = (sm[p.id] || []).slice().sort((a,b) => natural(locName(a.locId), locName(b.locId)));
+    const total = rows.reduce((a,r) => a + r.qty, 0);
+    const specs = specList(p);
+    const open = S.openPart === p.id;
+    const sub = [p.mfr, p.desc].filter(Boolean).join(' · ');
+    const type = [TYPES.find(t => t.id === p.cat) ? TYPES.find(t => t.id === p.cat).name : '', p.group, p.item].filter(Boolean).join(' › ');
+    let h = '<article class="part"><button type="button" class="part-head" data-act="openpart" data-v="'+esc(p.id)+'" aria-expanded="'+open+'">'+
+      '<span class="p-no">'+esc(p.partNo || p.desc || 'No part number')+'</span>'+
+      (sub ? '<span class="p-sub">'+esc(sub)+'</span>' : '')+
+      (specs.length ? '<span class="p-spec">'+esc(specs.slice(0,3).map(s => s.v).join(' · '))+'</span>' : '')+
+      '<span class="p-stock'+(total ? '' : ' zero')+'">'+total+'<small>in stock</small></span></button>';
+    if(open){
+      h += '<div class="p-body">';
+      if(type) h += '<div class="e-meta"><span>'+esc(type)+'</span></div>';
+      const dl = specs.map(s => '<dt>'+esc(s.k)+'</dt><dd>'+esc(s.v)+'</dd>')
+        .concat(p.orderNo ? ['<dt>Order no.</dt><dd class="mono">'+esc(p.orderNo)+'</dd>'] : []).join('');
+      if(dl) h += '<dl class="specs">'+dl+'</dl>';
+      h += '<h4 class="group">Stock by location</h4>';
+      if(!rows.length) h += '<p class="empty">Not recorded in any location yet.</p>';
+      rows.forEach(r => {
+        const stale = isStale(r.chk);
+        h += '<div class="srow"><div><b>'+esc(locName(r.locId))+'</b><small>'+esc(locArea(r.locId))+'</small><small class="'+(stale ? 'stale' : '')+'">'+esc(ago(r.chk))+'</small></div>'+
+          '<span class="sq">'+r.qty+'</span>'+
+          (S.canWrite ? '<button type="button" class="btn small" data-act="count" data-p="'+esc(p.id)+'" data-l="'+esc(r.locId)+'">Count</button>' : '<span></span>')+'</div>';
+      });
+      h += '<div class="row2">'+(S.canWrite ? '<button type="button" class="btn primary" data-act="addstock" data-v="'+esc(p.id)+'">Add stock</button>' : '')+
+        '<button type="button" class="btn" data-act="uselog" data-v="'+esc(p.id)+'">Use in log</button></div></div>';
+    }
+    return h + '</article>';
+  }).join('');
+}
+
+/* ---------- render: history ---------- */
+function matches(e){
+  if(S.hfilter !== 'all' && e.source !== S.hfilter) return false;
+  const q = S.hq.trim().toLowerCase();
+  if(!q) return true;
+  return [e.partNo,e.mfr,e.desc,e.machine,e.dept,e.item,e.cat,e.group,e.serial,e.orderNo,e.job,e.note,e.loc].some(x => String(x||'').toLowerCase().includes(q));
+}
+function renderHistory(){
+  $('#hfilter').innerHTML = [['all','All'],['machine','Machines'],['stores','Stores out'],['in','Stores in']].map(([v,t]) =>
+    '<button type="button" data-act="hfilter" data-v="'+v+'" aria-pressed="'+(S.hfilter===v)+'">'+t+'</button>').join('');
+  $('#exportBtn').hidden = !(S.downloads && S.logs.length);
+  const list = S.logs.filter(matches);
+  const today = dayKey(Date.now());
+  const nToday = S.logs.filter(e => dayKey(e.ts) === today).length;
+  $('#sum').textContent = S.logsLoaded
+    ? S.logs.length + ' logged · ' + nToday + ' today' + (list.length !== S.logs.length ? ' · ' + list.length + ' shown' : '')
+    : 'Loading…';
+  if(!S.logsLoaded){ $('#list').innerHTML = ''; return; }
+  if(!S.logs.length){ $('#list').innerHTML = '<p class="empty">Nothing logged yet. Parts you log will show up here, newest first.</p>'; return; }
+  if(!list.length){ $('#list').innerHTML = '<p class="empty">No entries match.</p>'; return; }
+  let html = '', last = '';
+  list.forEach(e => {
+    const k = dayKey(e.ts);
+    if(k !== last){ html += '<h3 class="day">'+esc(dayLabel(e.ts))+'</h3>'; last = k; }
+    let where;
+    if(e.source === 'machine') where = '<span class="tag">Machine</span><span>'+esc(e.machine||'Unknown machine')+'</span>' + (e.loc ? '<span>to '+esc(e.loc)+'</span>' : '');
+    else if(e.source === 'in') where = '<span class="tag in">Stores in</span><span>to '+esc(e.loc||'unknown location')+'</span>';
+    else if(e.source === 'count') where = '<span class="tag warn">Count</span><span>'+(e.movedTo ? 'moved from '+esc(e.loc)+' to '+esc(e.movedTo) : esc(e.loc||'')+' · '+esc(e.prev)+' → '+esc(e.qty))+'</span>';
+    else where = '<span class="tag stores">Stores out</span>' + (e.loc ? '<span>from '+esc(e.loc)+'</span>' : '') + (e.machine ? '<span>for '+esc(e.machine)+'</span>' : '');
+    const type = [e.cat, e.group, e.item].filter(Boolean).join(' › ');
+    const who = e.by ? (S.names[e.by] || '') : '';
+    const sub = [e.mfr, e.desc].filter(Boolean).join(' · ');
+    const badge = e.source === 'in' ? '+' + e.qty : (e.source !== 'count' && e.qty > 1 ? '×' + e.qty : '');
+    html += '<article class="entry">'+
+      '<div class="e-head"><span class="e-part">'+esc(e.partNo || e.desc || e.mfr || 'No part number')+'</span>'+(badge?'<span class="e-qty">'+esc(badge)+'</span>':'')+'</div>'+
+      (sub && e.partNo ? '<p class="e-desc">'+esc(sub)+'</p>' : '')+
+      '<div class="e-meta">'+where+(e.dept?'<span>'+esc(e.dept)+'</span>':'')+(type?'<span>'+esc(type)+'</span>':'')+'</div>'+
+      (e.job || e.serial || e.note ? '<div class="e-meta">'+(e.job?'<span>Job '+esc(e.job)+'</span>':'')+(e.serial?'<span>S/N '+esc(e.serial)+'</span>':'')+(e.note?'<span>'+esc(e.note)+'</span>':'')+'</div>' : '')+
+      '<div class="e-foot"><span>'+esc(timeFmt(e.ts))+(who?' · '+esc(who):'')+'</span>'+
+      (S.canWrite?'<button type="button" class="rm'+(S.confirmRm===e.id?' sure':'')+'" data-act="rm" data-v="'+esc(e.id)+'">'+(S.confirmRm===e.id?'Tap again to remove':'Remove')+'</button>':'')+
+      '</div></article>';
+  });
+  $('#list').innerHTML = html;
+}
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3200);
+}
+function dbMessage(e){
+  const c = e && e.code;
+  if(c === 'quota_exceeded') return 'The log is full. Ask the owner to clear out old entries.';
+  if(c === 'invalid_argument') return 'You can view this log but not add to it.';
+  if(c === 'resource_exhausted') return 'Too many saves at once. Wait a moment and try again.';
+  if(c === 'revoked') return 'Access to this log changed. Reload the page.';
+  return 'Could not save. Check the connection and try again.';
+}
+
+/* ---------- views ---------- */
+function setView(v){
+  S.view = v;
+  ['log','stores','history'].forEach(n => {
+    $('#view-'+n).hidden = n !== v;
+    $('#tab-'+n).setAttribute('aria-selected', n === v);
+  });
+  if(v === 'history') renderHistory();
+  if(v === 'stores') renderStores();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- sheet: stock check and add stock ---------- */
+function openSheet(sh){
+  S.sheet = Object.assign({addLoc:false, moved:false, newLoc:'', locId:'', qty:0, expected:0, mode:'check', reason:''}, sh);
+  renderSheet();
+  $('#scrim').hidden = false;
+  const h = $('#sheetTitle'); if(h) h.focus();
+}
+function closeSheet(){ S.sheet = null; $('#scrim').hidden = true; $('#sheetBody').innerHTML = ''; }
+function sheetBtnState(){
+  const sh = S.sheet, go = $('#shGo'); if(!sh || !go) return;
+  const qty = Math.round(Number(sh.qty));
+  if(sh.mode === 'add'){
+    go.textContent = 'Add ' + (qty > 0 ? qty : '') + (sh.locId ? ' to ' + locName(sh.locId) : '');
+    go.disabled = !(qty >= 1 && sh.locId);
+  } else if(sh.moved){
+    go.textContent = 'Save new location'; go.disabled = !sh.newLoc || !(qty >= 0);
+  } else {
+    go.textContent = qty === sh.expected ? 'Count is right' : 'Update count to ' + qty;
+    go.disabled = !(qty >= 0);
+  }
+}
+function renderSheet(){
+  const sh = S.sheet; if(!sh) return;
+  const p = S.parts.find(x => x.id === sh.partId);
+  const line = '<p class="part-line">'+esc(p ? (p.partNo || p.desc || '') : '')+(p && p.desc && p.partNo ? ' · ' + esc(p.desc) : '')+'</p>';
+  const stepper = '<div class="qty"><button type="button" class="btn" data-act="shqm" aria-label="One fewer">−</button>'+
+    '<input id="shQty" type="number" inputmode="numeric" min="0" max="9999" value="'+esc(sh.qty)+'" aria-label="Quantity">'+
+    '<button type="button" class="btn" data-act="shqp" aria-label="One more">+</button></div>';
+  let h = '';
+  if(sh.mode === 'add'){
+    h += '<h2 id="sheetTitle" tabindex="-1">Add stock</h2>' + line +
+      '<div class="lab">Which location?</div>' + locSelectHtml('shLoc', sh.locId, sh.partId, {}) +
+      (sh.addLoc ? '<div class="addloc">'+addLocHtml('sheet')+'</div>' : '') +
+      '<div class="lab">How many are you adding?</div>' + stepper +
+      '<div class="row2"><button type="button" class="btn" data-act="shclose">Cancel</button><button type="button" class="btn primary" id="shGo" data-act="shgo">Add</button></div>';
+  } else {
+    h += '<h2 id="sheetTitle" tabindex="-1">Check the stock</h2>' + line +
+      '<p>' + esc(sh.reason) + ' <b>' + esc(locName(sh.locId)) + '</b>.</p>' +
+      '<div class="lab">How many are there now?</div>' + stepper +
+      '<p class="note">The system shows ' + sh.expected + '.</p>' +
+      '<div class="lab">Is it still kept here?</div>' +
+      '<div class="seg"><button type="button" data-act="shhere" aria-pressed="'+(!sh.moved)+'">Yes, still here</button><button type="button" data-act="shmoved" aria-pressed="'+sh.moved+'">It has moved</button></div>' +
+      (sh.moved ? '<div class="lab">New location</div>' + locSelectHtml('shNew', sh.newLoc, '', {exclude:sh.locId}) : '') +
+      (sh.moved && sh.addLoc ? '<div class="addloc">'+addLocHtml('sheet')+'</div>' : '') +
+      '<div class="row2"><button type="button" class="btn" data-act="shclose">' + (sh.reason.indexOf('took') >= 0 ? 'Skip for now' : 'Cancel') + '</button><button type="button" class="btn primary" id="shGo" data-act="shgo">Confirm</button></div>';
+  }
+  $('#sheetBody').innerHTML = h;
+  sheetBtnState();
+}
+
+async function putStock(pid, lid, qty, chk){
+  const r = stockRow(pid, lid);
+  await store.set('stock', pid + '__' + lid, {
+    partId:pid, locId:lid, qty:Math.max(0, Math.round(qty)),
+    chk: chk !== undefined ? chk : (r ? r.chk : 0),
+    chkBy: chk !== undefined ? (S.uid || '') : (r ? r.chkBy : '')
+  });
+}
+function logCount(p, lid, prev, qty, movedTo){
+  return store.add('logs', {
+    ts:Date.now(), source:'count', partId:p.id, partNo:p.partNo || '', mfr:p.mfr || '', desc:p.desc || '',
+    qty:qty, prev:prev, locId:lid, loc:locName(lid), movedTo:movedTo ? locName(movedTo) : '',
+    by:S.uid || '', dept:'', machine:'', cat:'', group:'', item:'', orderNo:'', serial:'', job:'', note:''
+  });
+}
+async function sheetGo(){
+  const sh = S.sheet; if(!sh || !store) return;
+  const p = S.parts.find(x => x.id === sh.partId); if(!p) return;
+  const qty = Math.max(0, Math.round(Number(sh.qty) || 0));
+  const btn = $('#shGo'); if(btn) btn.disabled = true;
+  try{
+    if(sh.mode === 'add'){
+      const cur = stockRow(p.id, sh.locId);
+      await putStock(p.id, sh.locId, (cur ? cur.qty : 0) + qty);
+      await store.add('logs', {
+        ts:Date.now(), source:'in', partId:p.id, partNo:p.partNo || '', mfr:p.mfr || '', desc:p.desc || '',
+        cat:(TYPES.find(t => t.id === p.cat) || {name:''}).name, group:p.group || '', item:p.item || '',
+        qty:qty, locId:sh.locId, loc:locName(sh.locId), by:S.uid || '', dept:'', machine:'', orderNo:p.orderNo || '', serial:'', job:'', note:''
+      });
+      toast('Added ' + qty + ' to ' + locName(sh.locId));
+    } else if(sh.moved){
+      const ex = stockRow(p.id, sh.newLoc);
+      await putStock(p.id, sh.newLoc, (ex ? ex.qty : 0) + qty, Date.now());
+      await store.del('stock', p.id + '__' + sh.locId);
+      await logCount(p, sh.locId, sh.expected, qty, sh.newLoc);
+      toast('Moved to ' + locName(sh.newLoc));
+    } else {
+      await putStock(p.id, sh.locId, qty, Date.now());
+      if(qty !== sh.expected){ await logCount(p, sh.locId, sh.expected, qty, ''); toast('Count updated to ' + qty); }
+      else toast('Stock confirmed');
+    }
+    closeSheet();
+  }catch(e){
+    toast(dbMessage(e));
+    sheetBtnState();
+  }
+}
+
+/* ---------- label scan ---------- */
+function setScan(msg, kind){
+  const el = $('#scanStatus'); el.textContent = msg || ''; el.className = 'status' + (kind ? ' ' + kind : '');
+}
+function showPhoto(file){
+  if(photoUrl) URL.revokeObjectURL(photoUrl);
+  photoUrl = URL.createObjectURL(file);
+  const img = $('#scanImg'); img.src = photoUrl; img.hidden = false;
+  $('#scanEmpty').hidden = true;
+}
+function clearPhoto(){
+  if(photoUrl) URL.revokeObjectURL(photoUrl);
+  photoUrl = '';
+  $('#scanImg').hidden = true; $('#scanImg').removeAttribute('src');
+  $('#scanEmpty').hidden = false;
+  setScan('');
+}
+function scanCopy(code){
+  switch(code){
+    case 'not_granted': return 'Label reading is switched off for this page. Type the details below.';
+    case 'rate_limited': return 'Too many scans in a short time, or your usage limit is reached. Try again shortly.';
+    case 'image_rejected': return 'That photo could not be used. Take another one.';
+    case 'invalid_json': return 'Could not read that label. Take a closer, flatter photo or type the details.';
+    case 'refused': return 'That photo could not be read. Type the details below.';
+    case 'session_expired': return 'Sign in again to read labels.';
+    default: return 'Label reading failed. Take another photo or type the details.';
+  }
+}
+function labelPrompt(barcode){
+  return 'You are reading a photo of a part label, nameplate or the part itself, taken in an engineering stores or workshop. '+
+    'Extract what is printed. Never guess or invent characters. If a field is not visible or not clearly legible, return an empty string for it.\n\n'+
+    'Reply with only a JSON object in exactly this shape:\n'+
+    '{"manufacturer":"","partNumber":"","orderNumber":"","description":"","serial":"","specs":[{"name":"","value":""}],"confidence":"high"}\n\n'+
+    '- manufacturer: the brand or maker.\n'+
+    '- partNumber: the manufacturer\'s part, model or type number (labels may say P/N, Type, Model, Art.-Nr., MLFB, Cat. No.).\n'+
+    '- orderNumber: any separate order, article or stock number.\n'+
+    '- description: a short plain description if the label states one, for example "24 V DC power supply, 10 A".\n'+
+    '- serial: serial number, batch or date code.\n'+
+    '- specs: technical ratings printed on the label, one entry each, with the unit in the value. Use these names where they fit: Voltage, Current, Power, Frequency, Pressure, Flow, Port / thread, Range, Output signal, IP rating. For anything else use the label\'s own wording as the name. Use an empty array if none are printed.\n'+
+    '- confidence: "low" if any text was blurry, cut off or ambiguous, otherwise "high".\n'+
+    (barcode ? '\nA barcode in the photo decoded to: ' + barcode + ' (it may hold the part or serial number).\n' : '');
+}
+async function readLabel(file){
+  if(!S.sample || !S.imgOk){
+    setScan('Photo attached. Label reading is not available in this view, so type the details below.', 'warn');
+    return;
+  }
+  S.scanning = true; S.ctl = new AbortController();
+  $('#scanBtn').disabled = true; $('#scanStop').hidden = false;
+  setScan('Reading label…');
+  let barcode = '';
+  try{
+    if('BarcodeDetector' in window){
+      const bmp = await createImageBitmap(file);
+      const found = await new BarcodeDetector().detect(bmp);
+      barcode = found.map(x => x.rawValue).filter(Boolean).slice(0,3).join(' | ');
+    }
+  }catch(e){}
+  try{
+    const out = await S.sample.json(labelPrompt(barcode), {images:file, signal:S.ctl.signal});
+    const g = k => String((out && out[k]) || '').trim().slice(0,200);
+    S.partId = '';
+    $('#mfr').value = g('manufacturer');
+    $('#partNo').value = g('partNumber');
+    $('#orderNo').value = g('orderNumber');
+    $('#desc').value = g('description');
+    $('#serial').value = g('serial') || (barcode && !g('partNumber') ? barcode.split(' | ')[0] : '');
+    if($('#orderNo').value || $('#serial').value) $('#more').open = true;
+    const got = Array.isArray(out && out.specs) ? out.specs : [];
+    got.forEach(s => {
+      const k = String((s && s.name) || '').trim().slice(0,40), v = String((s && s.value) || '').trim().slice(0,80);
+      if(!k || !v) return;
+      const ex = S.specs.find(x => norm(x.k) === norm(k));
+      if(ex) ex.v = v; else S.specs.push({k:k, v:v});
+    });
+    renderSpecs(); onPartInput(); renderFind();
+    const found = ['manufacturer','partNumber','orderNumber','description','serial'].filter(k => g(k)).length + got.length;
+    if(!found) setScan('Nothing readable on that photo. Try again closer, or type the details.', 'warn');
+    else if(out && out.confidence === 'low') setScan('Read with low confidence. Check each field against the label.', 'warn');
+    else setScan('Label read. Check the details match before logging.', 'ok');
+  }catch(e){
+    if(e && e.code === 'cancelled') setScan('Scan stopped.');
+    else setScan(scanCopy(e && e.code), 'warn');
+  }finally{
+    S.scanning = false; S.ctl = null;
+    $('#scanBtn').disabled = false; $('#scanStop').hidden = true;
+    renderBar();
+  }
+}
+
+/* ---------- storage: shared db, with a device-only fallback ---------- */
+function dbFail(e){
+  S.error = (e && e.code === 'revoked') ? 'Access to this log changed. Reload the page.' : 'The shared log could not be loaded. Check the connection and reload.';
+  S.logsLoaded = true;
+  renderMode(); renderHistory();
+}
+function makeDbStore(db){
+  return {
+    set:(c, id, d) => db.collection(c).doc(id).set(d),
+    add:(c, d) => db.collection(c).add(d),
+    del:(c, id) => db.collection(c).doc(id).delete(),
+    sub:(c, cb, q) => {
+      let ref = db.collection(c);
+      if(q && q.order) ref = ref.orderBy(q.order, q.dir || 'asc');
+      if(q && q.limit) ref = ref.limit(q.limit);
+      ref.onSnapshot(snap => cb(snap.docs.map(d => Object.assign({id:d.id}, d.data()))), dbFail);
+    }
+  };
+}
+function makeLocalStore(){
+  const key = 'spares-log-data-v2';
+  let data = LS.get(key, null);
+  if(!data){
+    data = {machines:{hermle:{name:'Hermle'}, wfl:{name:'WFL'}, heyligenstaedt:{name:'Heyligenstaedt'}}, locations:{}};
+    SEED_LOCS.forEach(([a,n]) => { data.locations[slug(a + '-' + n)] = {area:a, name:n, ts:Date.now()}; });
+  }
+  const cbs = {};
+  const rows = c => Object.keys(data[c] || {}).map(id => Object.assign({id:id}, data[c][id]));
+  const emit = c => (cbs[c] || []).forEach(f => f(rows(c)));
+  const save = () => LS.set(key, data);
+  const set = async (c, id, d) => { (data[c] = data[c] || {})[id] = JSON.parse(JSON.stringify(d)); save(); emit(c); };
+  return {
+    set:set,
+    add:(c, d) => set(c, 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), d),
+    del:async (c, id) => { if(data[c]) delete data[c][id]; save(); emit(c); },
+    sub:(c, cb) => { (cbs[c] = cbs[c] || []).push(cb); cb(rows(c)); }
+  };
+}
+async function resolveNames(){
+  if(!S.user) return;
+  const ids = Array.from(new Set(S.logs.map(e => e.by).filter(Boolean)));
+  if(!ids.length) return;
+  try{
+    const ps = await S.user.profiles(ids);
+    let changed = false;
+    ids.forEach(id => { const n = (ps[id] && ps[id].name) || ''; if(n && S.names[id] !== n){ S.names[id] = n; changed = true; } });
+    if(changed && S.view === 'history') renderHistory();
+  }catch(e){}
+}
+async function initStore(){
+  const [db, user] = await Promise.all([use('db'), use('user')]);
+  S.user = user;
+  if(user){
+    try{
+      S.uid = await user.id();
+      const can = await user.can('data.write');
+      if(can === false) S.canWrite = false;
+    }catch(e){}
+  }
+  S.mode = db ? 'shared' : 'local';
+  store = db ? makeDbStore(db) : makeLocalStore();
+
+  store.sub('machines', rows => {
+    S.machines = rows.map(r => ({id:r.id, name:String(r.name || r.id)})).sort((a,b) => a.name.localeCompare(b.name));
+    renderMachines(); renderBar();
+  });
+  store.sub('components', rows => {
+    S.custom = rows.map(r => ({id:r.id, cat:String(r.cat || ''), group:String(r.group || ''), name:String(r.name || '')})).filter(c => c.name);
+    renderTypes(); renderFind(); renderBar();
+  });
+  store.sub('locations', rows => {
+    S.locs = rows.filter(r => r.name).map(r => ({id:r.id, area:String(r.area || 'Other'), name:String(r.name)}))
+      .sort((a,b) => natural(a.area, b.area) || natural(a.name, b.name));
+    renderLocs(); renderStores(); renderBar();
+    if(S.sheet && !S.sheet.addLoc) renderSheet();
+  });
+  store.sub('parts', rows => {
+    S.parts = rows;
+    renderFind(); renderPicked(); renderStores();
+  });
+  store.sub('stock', rows => {
+    S.stock = rows.map(r => ({id:r.id, partId:String(r.partId || ''), locId:String(r.locId || ''), qty:Number(r.qty) || 0, chk:Number(r.chk) || 0, chkBy:String(r.chkBy || '')}));
+    renderLocs(); renderFind(); renderPicked(); renderStores();
+  });
+  store.sub('logs', rows => {
+    S.logs = rows.slice().sort((a,b) => (b.ts || 0) - (a.ts || 0)).slice(0, 300);
+    S.logsLoaded = true;
+    renderHistory(); resolveNames();
+  }, {order:'ts', dir:'desc', limit:300});
+  renderMode(); renderBar();
+}
+
+async function initExtras(){
+  S.sample = await use('sample');
+  if(S.sample){
+    try{ const l = await S.sample.limits(); S.imgOk = !!(l && l.images); }catch(e){ S.imgOk = false; }
+  }
+  if(!S.sample || !S.imgOk){
+    $('#scanBtn').textContent = 'Attach photo';
+    $('.scan-hint').textContent = 'Label reading is not available in this view. Type the part details below.';
+  }
+  S.downloads = await use('downloads');
+  if(S.view === 'history') renderHistory();
+  if(S.view === 'stores') renderStores();
+}
+
+/* ---------- actions ---------- */
+function persistPrefs(){ LS.set('spares-log-prefs', {source:S.source, dept:S.dept, machine:S.machine}); }
+
+async function addMachine(){
+  const inp = $('#newMachine'), name = inp.value.trim().replace(/\s+/g,' ');
+  if(!name){ inp.focus(); return; }
+  try{
+    await store.set('machines', slug(name), {name:name, ts:Date.now()});
+    const m = S.machines.find(x => slug(x.name) === slug(name));
+    S.machine = m ? m.name : name;
+    inp.value = ''; $('#addRow').hidden = true;
+    persistPrefs(); renderMachines(); renderBar();
+    toast('Added ' + name);
+  }catch(e){ toast(dbMessage(e)); }
+}
+
+async function addComponent(){
+  const inp = $('#newComp'), name = inp.value.trim().replace(/\s+/g,' ');
+  const t = S.addTarget, cat = TYPES.find(c => t && c.id === t.cat);
+  if(!name){ inp.focus(); return; }
+  if(!cat) return;
+  const g = cat.groups.find(x => x.name === t.group) || cat.groups[0];
+  const existing = itemsFor(cat, g).find(x => x.toLowerCase() === name.toLowerCase());
+  try{
+    if(!existing) await store.set('components', slug(cat.id + '-' + g.name + '-' + name), {cat:cat.id, group:g.name, name:name, ts:Date.now()});
+    S.item = existing || name; S.group = g.name;
+    inp.value = ''; $('#addComp').hidden = true; S.addTarget = null;
+    renderTypes(); renderFind(); renderBar();
+    toast(existing ? 'Already listed. Selected ' + existing : 'Added ' + name + (g.name ? ' to ' + g.name : ' to ' + cat.name));
+  }catch(e){ toast(dbMessage(e)); }
+}
+
+async function saveLoc(ctx){
+  const aEl = $('#locArea-'+ctx), nEl = $('#locName-'+ctx);
+  if(!aEl || !nEl) return;
+  const a = aEl.value.trim().replace(/\s+/g,' '), n = nEl.value.trim().replace(/\s+/g,' ');
+  if(!a){ aEl.focus(); return; }
+  if(!n){ nEl.focus(); return; }
+  const id = slug(a + '-' + n);
+  try{
+    await store.set('locations', id, {area:a, name:n, ts:Date.now()});
+    if(ctx === 'form'){
+      S.loc = id; $('#addLoc-form').hidden = true; $('#addLoc-form').innerHTML = '';
+      renderLocs(); renderBar();
+    } else if(S.sheet){
+      S.sheet.addLoc = false;
+      if(S.sheet.mode === 'add') S.sheet.locId = id; else S.sheet.newLoc = id;
+      renderSheet();
+    }
+    toast('Added ' + n);
+  }catch(e){ toast(dbMessage(e)); }
+}
+
+function mergeSpecs(oldList, newList){
+  const out = (oldList || []).filter(s => s && s.k && s.v).map(s => ({k:s.k, v:s.v}));
+  newList.forEach(s => { const ex = out.find(x => norm(x.k) === norm(s.k)); if(ex) ex.v = s.v; else out.push({k:s.k, v:s.v}); });
+  return out;
+}
+
+async function logPart(){
+  const m = missing(); if(m || !store) return;
+  S.saving = true; renderBar();
+  const cat = TYPES.find(c => c.id === S.cat);
+  const qty = Math.max(1, Math.round(Number(val('qty')) || 1));
+  const specs = S.specs.map(s => ({k:s.k, v:s.v.trim()})).filter(s => s.v);
+  const existing = currentPart();
+  const partNo = val('partNo');
+  const partId = existing ? existing.id
+    : (partNo ? slug(partNo) + (val('mfr') ? '_' + slug(val('mfr')) : '') : 'p-' + Date.now().toString(36));
+  const group = S.item === 'Other' ? '' : S.group;
+  const part = {
+    mfr: val('mfr') || (existing && existing.mfr) || '',
+    partNo: partNo || (existing && existing.partNo) || '',
+    orderNo: val('orderNo') || (existing && existing.orderNo) || '',
+    desc: val('desc') || (existing && existing.desc) || '',
+    cat: S.cat, group:group, item:itemText(),
+    specs: mergeSpecs(existing && existing.specs, specs),
+    ts: (existing && existing.ts) || Date.now(), upd: Date.now()
+  };
+  const lid = needsLoc() ? S.loc : '';
+  const entry = {
+    ts: Date.now(), source: S.source, dept: S.source === 'in' ? '' : S.dept, machine: S.source === 'in' ? '' : S.machine,
+    cat: cat ? cat.name : '', group:group, item: itemText(),
+    mfr: part.mfr, partNo: part.partNo, orderNo: part.orderNo, desc: part.desc, serial: val('serial'), specs:specs,
+    partId: partId, locId: lid, loc: lid ? locName(lid) : '', reusable: S.source === 'machine' && S.reusable,
+    qty: qty, job: val('job'), note: val('note'), by: S.uid || ''
+  };
+  try{
+    await store.set('parts', partId, part);
+    await store.add('logs', entry);
+    let remaining = null;
+    if(lid){
+      const cur = stockRow(partId, lid), have = cur ? cur.qty : 0;
+      if(S.source === 'stores'){ remaining = Math.max(0, have - qty); await putStock(partId, lid, remaining); }
+      else { await putStock(partId, lid, have + qty); }
+    }
+    const label = entry.partNo || entry.desc || entry.mfr;
+    toast(S.source === 'in' ? 'Added ' + label + ' to ' + locName(lid) : 'Logged ' + label + (entry.machine ? ' · ' + entry.machine : ' · Stores'));
+    persistPrefs();
+    ['mfr','partNo','orderNo','desc','serial','job','note','otherText','pfind'].forEach(id => { $('#'+id).value = ''; });
+    $('#qty').value = 1; $('#more').open = false;
+    S.cat = ''; S.group = ''; S.item = ''; S.specs = []; S.partId = ''; S.loc = ''; S.reusable = false;
+    clearPhoto();
+    renderSource(); renderTypes(); renderSpecs(); renderFind(); renderPicked(); renderBar();
+    window.scrollTo(0, 0);
+    if(S.source === 'stores' && lid){
+      openSheet({mode:'check', partId:partId, locId:lid, expected:remaining, qty:remaining,
+        reason:'You took ' + qty + '. The system now shows ' + remaining + ' left. Count what is on the shelf at'});
+    }
+  }catch(e){
+    toast(dbMessage(e));
+  }finally{
+    S.saving = false; renderBar();
+  }
+}
+
+function csvCell(v){ const s = String(v == null ? '' : v); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; }
+async function saveCsv(name, head, rows){
+  const csv = '﻿' + [head].concat(rows).map(r => r.map(csvCell).join(',')).join('\r\n');
+  try{
+    await S.downloads.save({filename:name, data:csv});
+    toast('Saved ' + name);
+  }catch(e){
+    if(!e || e.code !== 'declined') toast('Could not save the file.');
+  }
+}
+function exportCsv(){
+  if(!S.downloads || !S.logs.length) return;
+  const label = {machine:'From machine', stores:'From stores', 'in':'Into stores', count:'Stock count'};
+  const head = ['Date','Time','Action','Department','Machine','Category','Group','Component','Manufacturer','Part number','Order / stores no.','Description','Specification','Serial / batch','Qty','Location','Job','Notes','Logged by'];
+  const rows = S.logs.map(e => [dayKey(e.ts), timeFmt(e.ts), label[e.source] || e.source, e.dept, e.machine, e.cat, e.group, e.item, e.mfr, e.partNo, e.orderNo, e.desc,
+    (e.specs || []).map(s => s.k + ': ' + s.v).join('; '), e.serial, e.qty, e.loc, e.job, e.note, e.by ? (S.names[e.by] || '') : '']);
+  saveCsv('spares-log-' + dayKey(Date.now()) + '.csv', head, rows);
+}
+function exportStock(){
+  if(!S.downloads || !S.parts.length) return;
+  const sm = stockMap();
+  const head = ['Part number','Manufacturer','Description','Order / stores no.','Category','Group','Component','Specification','Area','Location','Qty','Last counted'];
+  const rows = [];
+  S.parts.slice().sort((a,b) => natural(a.partNo || a.desc || '', b.partNo || b.desc || '')).forEach(p => {
+    const base = [p.partNo, p.mfr, p.desc, p.orderNo, (TYPES.find(t => t.id === p.cat) || {name:''}).name, p.group, p.item, specList(p).map(s => s.k + ': ' + s.v).join('; ')];
+    const r = sm[p.id] || [];
+    if(!r.length) rows.push(base.concat(['','',0,'']));
+    r.forEach(x => rows.push(base.concat([locArea(x.locId), locName(x.locId), x.qty, x.chk ? dayKey(x.chk) : 'never'])));
+  });
+  saveCsv('stores-list-' + dayKey(Date.now()) + '.csv', head, rows);
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]'); if(!el) return;
+  const act = el.dataset.act, v = el.dataset.v;
+  switch(act){
+    case 'view': setView(v); break;
+    case 'scan': if(!S.scanning) $('#photo').click(); break;
+    case 'stop': if(S.ctl) S.ctl.abort(); break;
+    case 'source':
+      S.source = v; S.reusable = false;
+      S.loc = ''; persistPrefs(); renderSource(); renderBar(); break;
+    case 'addmachine': $('#addRow').hidden = false; $('#newMachine').focus(); break;
+    case 'cancelmachine': $('#addRow').hidden = true; $('#newMachine').value = ''; break;
+    case 'savemachine': addMachine(); break;
+    case 'savecomp': addComponent(); break;
+    case 'cancelcomp': $('#addComp').hidden = true; $('#newComp').value = ''; S.addTarget = null; break;
+    case 'qty': { const q = Math.min(999, Math.max(1, (Number(val('qty')) || 1) + Number(v))); $('#qty').value = q; renderBar(); break; }
+    case 'usepart': usePart(v); break;
+    case 'clearpart': clearPart(); break;
+    case 'cancelspec': $('#addSpec').hidden = true; $('#newSpec').value = ''; break;
+    case 'savespec': {
+      const n = $('#newSpec').value.trim().replace(/\s+/g,' ');
+      if(!n){ $('#newSpec').focus(); break; }
+      if(!S.specs.some(s => norm(s.k) === norm(n))) S.specs.push({k:n, v:''});
+      $('#newSpec').value = ''; $('#addSpec').hidden = true;
+      renderSpecs(S.specs.findIndex(s => norm(s.k) === norm(n)));
+      break;
+    }
+    case 'rmspec': S.specs.splice(Number(v), 1); renderSpecs(); break;
+    case 'saveloc': saveLoc(el.dataset.ctx); break;
+    case 'cancelloc':
+      if(el.dataset.ctx === 'form'){ $('#addLoc-form').hidden = true; $('#addLoc-form').innerHTML = ''; }
+      else if(S.sheet){ S.sheet.addLoc = false; renderSheet(); }
+      break;
+    case 'log': logPart(); break;
+    case 'hfilter': S.hfilter = v; renderHistory(); break;
+    case 'export': exportCsv(); break;
+    case 'exportstock': exportStock(); break;
+    case 'openpart': S.openPart = S.openPart === v ? '' : v; renderStores(); break;
+    case 'receive': S.source = 'in'; S.loc = ''; persistPrefs(); renderSource(); renderBar(); setView('log'); break;
+    case 'uselog': S.source = 'stores'; S.loc = ''; persistPrefs(); renderSource(); usePart(v); setView('log'); { const sp = $('#sec-part'); if(sp) sp.scrollIntoView(); } break;
+    case 'addstock': openSheet({mode:'add', partId:v, qty:1}); break;
+    case 'count': {
+      const r = stockRow(el.dataset.p, el.dataset.l);
+      openSheet({mode:'check', partId:el.dataset.p, locId:el.dataset.l, expected:r ? r.qty : 0, qty:r ? r.qty : 0, reason:'Count what is on the shelf at'});
+      break;
+    }
+    case 'shqm': case 'shqp': {
+      if(!S.sheet) break;
+      const min = S.sheet.mode === 'add' ? 1 : 0;
+      S.sheet.qty = Math.min(9999, Math.max(min, (Math.round(Number(S.sheet.qty)) || 0) + (act === 'shqp' ? 1 : -1)));
+      $('#shQty').value = S.sheet.qty; sheetBtnState(); break;
+    }
+    case 'shmoved': if(S.sheet){ S.sheet.moved = true; renderSheet(); } break;
+    case 'shhere': if(S.sheet){ S.sheet.moved = false; renderSheet(); } break;
+    case 'shgo': sheetGo(); break;
+    case 'shclose': closeSheet(); break;
+    case 'rm':
+      if(S.confirmRm === v){
+        S.confirmRm = '';
+        store.del('logs', v).then(() => toast('Entry removed')).catch(e => { toast(dbMessage(e)); renderHistory(); });
+      } else {
+        S.confirmRm = v; renderHistory();
+        setTimeout(() => { if(S.confirmRm === v){ S.confirmRm = ''; renderHistory(); } }, 3500);
+      }
+      break;
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target, v = t.value;
+  switch(t.id){
+    case 'dept': S.dept = v; persistPrefs(); renderBar(); break;
+    case 'machine':
+      if(v === '__add'){ renderMachines(); $('#addRow').hidden = false; $('#newMachine').focus(); }
+      else { S.machine = v; persistPrefs(); renderBar(); }
+      break;
+    case 'cat':
+      if(S.cat !== v){ S.cat = v; S.group = ''; S.item = ''; $('#addComp').hidden = true; S.addTarget = null; }
+      renderTypes(); renderSpecs(); renderFind(); renderBar(); break;
+    case 'item':
+      if(v.indexOf('__add::') === 0){
+        const g = v.slice(7), c = TYPES.find(x => x.id === S.cat);
+        S.addTarget = {cat:S.cat, group:g};
+        $('#newCompLab').textContent = 'Add a component to ' + (g || (c ? c.name : ''));
+        renderTypes(); $('#addComp').hidden = false; $('#newComp').focus(); break;
+      }
+      if(v === '__other'){ S.item = 'Other'; S.group = ''; }
+      else if(v === ''){ S.item = ''; S.group = ''; }
+      else { const i = v.indexOf('::'); S.group = v.slice(0, i); S.item = v.slice(i + 2); }
+      renderTypes(); renderFind(); renderBar();
+      if(S.item === 'Other') $('#otherText').focus();
+      break;
+    case 'specAdd':
+      if(v === '__other'){ renderSpecs(); $('#addSpec').hidden = false; $('#newSpec').focus(); }
+      else if(v){ S.specs.push({k:v, v:''}); renderSpecs(S.specs.length - 1); }
+      break;
+    case 'loc':
+      if(v === '__add'){
+        renderLocs();
+        const box = $('#addLoc-form'); box.innerHTML = addLocHtml('form'); box.hidden = false; $('#locArea-form').focus();
+      } else { S.loc = v; renderLocs(); renderBar(); }
+      break;
+    case 'shLoc': case 'shNew':
+      if(!S.sheet) break;
+      if(v === '__add'){ S.sheet.addLoc = true; renderSheet(); const a = $('#locArea-sheet'); if(a) a.focus(); }
+      else { if(t.id === 'shLoc') S.sheet.locId = v; else S.sheet.newLoc = v; renderSheet(); }
+      break;
+    case 'afilter': S.aFilter = v; renderStores(); break;
+  }
+});
+$('#scrim').addEventListener('click', e => { if(e.target.id === 'scrim') closeSheet(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && S.sheet) closeSheet(); });
+$('#sheetBody').addEventListener('input', e => {
+  if(e.target.id === 'shQty' && S.sheet){ S.sheet.qty = e.target.value === '' ? 0 : Number(e.target.value); sheetBtnState(); }
+});
+$('#view-log').addEventListener('input', () => renderBar());
+$('#specRows').addEventListener('input', e => {
+  const i = Number(e.target.dataset.i);
+  if(S.specs[i]) S.specs[i].v = e.target.value;
+});
+['partNo','mfr'].forEach(id => $('#'+id).addEventListener('input', onPartInput));
+$('#pfind').addEventListener('input', renderFind);
+$('#reusable').addEventListener('change', e => { S.reusable = e.target.checked; S.loc = ''; renderSource(); renderBar(); });
+$('#hq').addEventListener('input', e => { S.hq = e.target.value; renderHistory(); });
+$('#sSearch').addEventListener('input', e => { S.sSearch = e.target.value; renderStores(); });
+$('#needsCheck').addEventListener('change', e => { S.needsCheck = e.target.checked; renderStores(); });
+$('#newMachine').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); addMachine(); } });
+$('#newComp').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); addComponent(); } });
+$('#newSpec').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('#addSpec').querySelector('[data-act="savespec"]').click(); } });
+$('#photo').addEventListener('change', e => {
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  showPhoto(file);
+  readLabel(file).then(() => { e.target.value = ''; });
+});
+
+/* ---------- start ---------- */
+renderAll(); renderMode(); renderHistory(); renderStores();
+initStore(); initExtras();
+})();
+</script>
+
+</body></html>
