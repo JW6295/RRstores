@@ -1,3 +1,9 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Spares Log</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -51,7 +57,9 @@ h1{margin:0;font:700 24px/1 var(--f-display);letter-spacing:.08em;text-transform
 
 /* scan viewfinder */
 .scan-frame{position:relative;aspect-ratio:16/10;max-width:100%;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
-.scan-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scan-frame img,.scan-frame video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.linkrow{display:flex;flex-wrap:wrap;gap:4px 20px}
+.ocrraw textarea{min-height:0;font:500 13px/1.4 var(--f-mono);margin-top:8px}
 .scan-empty{padding:0 36px;text-align:center}
 .scan-title{margin:0 0 4px;font:600 22px var(--f-display);letter-spacing:.08em;text-transform:uppercase}
 .scan-hint{margin:0;font-size:14px;color:var(--muted)}
@@ -189,7 +197,8 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:30;max-width:calc(100% - 32px);padding:12px 16px;background:var(--ink);color:var(--bg);border-radius:var(--r);font-weight:600;font-size:15px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
-
+</head>
+<body>
 <header class="top">
   <div class="top-in">
     <div class="brand">
@@ -261,6 +270,7 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
       <div class="sub">
         <div class="lab">Details <small>scan the label or type them in</small></div>
         <div class="scan-frame" id="scanFrame">
+          <video id="camVideo" playsinline muted autoplay hidden></video>
           <img id="scanImg" alt="Photo of the part label" hidden>
           <div class="scan-empty" id="scanEmpty">
             <p class="scan-title">Scan part label</p>
@@ -270,10 +280,21 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
         </div>
         <div class="scan-actions">
           <button type="button" class="btn primary" id="scanBtn" data-act="scan">Scan label</button>
+          <button type="button" class="btn primary" id="snapBtn" data-act="snap" hidden>Capture</button>
+          <button type="button" class="btn" id="camCancel" data-act="camcancel" hidden>Cancel</button>
           <button type="button" class="btn" id="scanStop" data-act="stop" hidden>Stop</button>
+        </div>
+        <div class="linkrow">
+          <button type="button" class="link" data-act="camapp">Use the phone's camera app</button>
+          <button type="button" class="link" data-act="choosephoto">Choose a photo</button>
         </div>
         <p class="status" id="scanStatus" role="status"></p>
         <input id="photo" type="file" accept="image/*" capture="environment" hidden>
+        <input id="photoPick" type="file" accept="image/*" hidden>
+        <details id="ocrRaw" class="ocrraw" hidden>
+          <summary>What the camera read</summary>
+          <textarea id="ocrText" readonly rows="6" aria-label="Text read from the label"></textarea>
+        </details>
 
         <div class="grid">
           <div class="field"><label for="mfr">Manufacturer</label><input id="mfr" autocomplete="off" autocapitalize="words" placeholder="e.g. Siemens"></div>
@@ -446,7 +467,7 @@ const S = {
   mode:'pending', canWrite:true, error:'',
   hfilter:'all', hq:'', sSearch:'', aFilter:'all', needsCheck:false, openPart:'',
   sheet:null,
-  sample:null, imgOk:null, scanning:false, ctl:null,
+  sample:null, imgOk:null, scanning:false, ctl:null, cam:null, ocr:{worker:null, loading:null, onProgress:null, abort:null},
   downloads:null, saving:false, confirmRm:''
 };
 let store = null;
@@ -674,7 +695,7 @@ function renderMode(){
   else { el.textContent = 'Connecting…'; el.className = 'mode'; }
   const b = $('#banner');
   let msg = S.error;
-  if(!msg && S.mode === 'local') msg = 'Entries are saved on this phone only. Open the shared link while signed in to log for everyone.';
+  if(!msg && S.mode === 'local') msg = 'Saved on this phone only. Other phones will not see these entries.';
   b.hidden = !msg; b.textContent = msg || '';
 }
 
@@ -797,6 +818,7 @@ function dbMessage(e){
 
 /* ---------- views ---------- */
 function setView(v){
+  if(S.cam) stopCamera();
   S.view = v;
   ['log','stores','history'].forEach(n => {
     $('#view-'+n).hidden = n !== v;
@@ -947,51 +969,319 @@ function labelPrompt(barcode){
     '- confidence: "low" if any text was blurry, cut off or ambiguous, otherwise "high".\n'+
     (barcode ? '\nA barcode in the photo decoded to: ' + barcode + ' (it may hold the part or serial number).\n' : '');
 }
-async function readLabel(file){
-  if(!S.sample || !S.imgOk){
-    setScan('Photo attached. Label reading is not available in this view, so type the details below.', 'warn');
+/* Turns raw OCR text from a part label into form fields. Pure function, no DOM. */
+const LABEL_BRANDS = [
+  'Siemens','Schneider Electric','Schneider','Telemecanique','ABB','Festo','SMC','Phoenix Contact','Omron','Mitsubishi',
+  'Allen-Bradley','Rockwell','Eaton','Moeller','Pilz','SICK','Balluff','Turck','Murrelektronik','Weidmuller','Weidmüller',
+  'Lenze','SEW-Eurodrive','SEW','Danfoss','Bosch Rexroth','Rexroth','Parker','Hydac','Hawe','Bucher','Heidenhain','Fanuc',
+  'Beckhoff','Wago','Pepperl+Fuchs','Keyence','Mean Well','Hager','Legrand','Baumer','Gefran','Yaskawa','Lovato','Crouzet',
+  'Camozzi','Norgren','Bosch','Harting','Lapp','Burkert','Bürkert','Moog','Leuze','WIKA','Endress+Hauser','Kollmorgen',
+  'Bonfiglioli','Rittal','Panasonic','Autonics','TDK-Lambda','Traco','Recom','Cosel','Ashcroft','Hirschmann','Kuebler',
+  'Kübler','Hengstler','Aventics','Vickers','Atos','Duplomatic','Zimmer','Schunk','SKF','NSK','NTN','THK','Hiwin',
+  'Optibelt','Contitech','Mayr','Rexnord','Baldor','Leroy-Somer','Nidec','Faulhaber','Maxon','Ganter','Kipp','Mazak',
+  'Okuma','Hermle','Heyligenstaedt','Finder','Banner'
+];
+const LABEL_WORDS = /(power supply|relay|contactor|circuit breaker|fuse|overload|terminal|connector|cable|switch|push ?button|lamp|sensor|proximity|solenoid|coil|motor|drive|inverter|transformer|encoder|valve|cylinder|pump|filter|gauge|transmitter|coupling|bearing|belt|regulator|hose|fitting|controller|module)/i;
+
+function parseLabel(raw){
+  const out = {manufacturer:'', partNumber:'', orderNumber:'', serial:'', description:'', specs:[]};
+  const lines = String(raw || '').replace(/\r/g,'').replace(/[|¦]/g,' ').split('\n')
+    .map(l => l.replace(/\s+/g,' ').trim()).filter(l => l.length > 1);
+  if(!lines.length) return out;
+  const full = lines.join('\n');
+  const UNIT = /^\d+(?:[.,]\d+)?\s?(?:V|A|W|VA|kW|Hz|bar|psi|mA|kg|mm|min)(?![A-Za-z0-9])/i;
+  const DATE = /^\d{1,4}[-\/.]\d{1,2}(?:[-\/.]\d{2,4})?$/;
+  const tidy = t => t.replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9+\/)]+$/g,'');
+
+  /* join the first token with following id-like fragments: "6EP1 334-2BA20" */
+  function idFrom(rest){
+    const toks = rest.split(' ').map(tidy).filter(Boolean);
+    if(!toks.length) return '';
+    let id = toks[0], used = 1;
+    while(used < toks.length && used < 3 && id.length <= 7 && (id + toks[used]).length <= 24 &&
+          /\d/.test(toks[used]) && !UNIT.test(toks[used]) && !DATE.test(toks[used]) && toks[used].length >= 3){
+      id += ' ' + toks[used]; used++;
+    }
+    return /\d/.test(id) && id.length >= 3 && id.length <= 26 ? id : '';
+  }
+  function grab(keyRe){
+    for(let i = 0; i < lines.length; i++){
+      const m = lines[i].match(keyRe);
+      if(!m) continue;
+      let rest = lines[i].slice(m.index + m[0].length).replace(/^[\s:.#=]+/,'');
+      let id = rest ? idFrom(rest) : '';
+      if(!id && !rest && lines[i + 1]) id = idFrom(lines[i + 1]);
+      if(id) return id;
+    }
+    return '';
+  }
+  out.partNumber = grab(/(?:^|[\s(])(?:P\/?N|Part\s*(?:No\.?|Number|#)|Type|Typ|Model|Mod\.?|Cat(?:alog(?:ue)?)?\.?\s*(?:No\.?|#)|MLFB)(?![A-Za-z])/i);
+  out.orderNumber = grab(/(?:^|[\s(])(?:Order\s*(?:No\.?|Number|Code)|Ord\.?\s*No\.?|Art(?:icle)?\.?[\s-]*(?:No\.?|Nr\.?)|Item\s*No\.?|Stock\s*No\.?|Mat(?:erial)?\.?\s*No\.?|ID[\s-]*(?:No\.?|Nr\.?))(?![A-Za-z])/i);
+  out.serial = grab(/(?:^|[\s(])(?:S\/N|SN|Ser(?:ial)?\.?\s*(?:No\.?|Number|#)?|Batch|Lot|Date\s*Code|D\/C|Fabr\.?\s*Nr\.?)(?![A-Za-z])/i);
+  if(out.orderNumber === out.partNumber) out.orderNumber = '';
+
+  /* manufacturer: brand that appears earliest in the text */
+  let best = null;
+  LABEL_BRANDS.forEach(b => {
+    const re = new RegExp('(^|[^A-Za-z0-9])' + b.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '(?![A-Za-z0-9])', 'i');
+    const m = full.match(re);
+    if(m && (best === null || m.index < best.i)) best = {i:m.index, name:b};
+  });
+  if(best) out.manufacturer = best.name;
+
+  /* no keyword on the label: take the most part-number-like token */
+  if(!out.partNumber){
+    let top = null;
+    full.split(/\s+/).map(tidy).forEach(t => {
+      if(t.length < 5 || t.length > 24 || UNIT.test(t) || DATE.test(t)) return;
+      if(t === out.orderNumber || t === out.serial) return;
+      const hasD = /\d/.test(t), hasL = /[A-Za-z]/.test(t);
+      if(!hasD) return;
+      const score = (hasL ? 3 : 0) + (/[-\/]/.test(t) ? 2 : 0) + t.length / 4;
+      if(top === null || score > top.s) top = {s:score, t:t};
+    });
+    if(top && top.s >= 4) out.partNumber = top.t;
+  }
+
+  /* ratings */
+  const pre = '(?:^|[\\s:(,=])';
+  const num = '(\\d{1,4}(?:[.,]\\d+)?(?:\\s?[-–\\/]\\s?\\d{1,4}(?:[.,]\\d+)?)?)';
+  const volts = [];
+  const vRe = new RegExp(pre + num + '\\s?V[Vv]?\\s?(AC|DC|~|=)?(?![A-Za-z0-9])', 'gi');
+  let m;
+  while((m = vRe.exec(full)) !== null){
+    const kind = m[2] ? (m[2] === '~' ? ' AC' : m[2] === '=' ? ' DC' : ' ' + m[2].toUpperCase()) : '';
+    const v = m[1].replace(/\s*([-–\/])\s*/g,'$1') + ' V' + kind;
+    if(!volts.includes(v)) volts.push(v);
+  }
+  if(volts.length) out.specs.push({name:'Voltage', value:volts.slice(0,2).join(' / ')});
+  const cur = full.match(new RegExp(pre + num + '\\s?A(?![A-Za-z0-9])', 'i'));
+  if(cur) out.specs.push({name:'Current', value:cur[1].replace(/\s*([-–\/])\s*/g,'$1') + ' A'});
+  const pow = full.match(new RegExp(pre + '(\\d{1,5}(?:[.,]\\d+)?)\\s?(kVA|VA|kW|W)(?![A-Za-z0-9])', 'i'));
+  if(pow) out.specs.push({name:'Power', value:pow[1] + ' ' + pow[2].replace(/^kva$/i,'kVA').replace(/^va$/i,'VA').replace(/^kw$/i,'kW').replace(/^w$/i,'W')});
+  const hz = full.match(/(\d{2,3}(?:\s?[\/-]\s?\d{2,3})?)\s?Hz/i);
+  if(hz) out.specs.push({name:'Frequency', value:hz[1].replace(/\s/g,'') + ' Hz'});
+  const pr = full.match(new RegExp(pre + num + '\\s?(bar|psi|MPa|kPa)(?![A-Za-z])', 'i'));
+  if(pr) out.specs.push({name:'Pressure', value:pr[1].replace(/\s*([-–\/])\s*/g,'$1') + ' ' + pr[2].toLowerCase().replace('mpa','MPa').replace('kpa','kPa')});
+  const fl = full.match(/(\d{1,5}(?:[.,]\d+)?)\s?(l\/min|lpm|m3\/h|m³\/h|l\/h)/i);
+  if(fl) out.specs.push({name:'Flow', value:fl[1] + ' ' + fl[2].toLowerCase()});
+  const sig = full.match(/(4\s?[-–]\s?20\s?mA|0\s?[-–]\s?10\s?V)/i);
+  if(sig) out.specs.push({name:'Output signal', value:sig[1].replace(/\s/g,'').replace(/(\d)(mA|V)/i,'$1 $2')});
+  const ip = full.match(/(?:^|[^A-Za-z0-9])(?:IP|[1Il]P)\s?([2-6]\d)(?![0-9A-Za-z])/);
+  if(ip) out.specs.push({name:'IP rating', value:'IP' + ip[1]});
+
+  /* description: a line that names the kind of part */
+  const d = lines.find(l => LABEL_WORDS.test(l) && l.length <= 80 && !/^(?:P\/?N|Type|Order|S\/N)(?![A-Za-z])/i.test(l));
+  if(d) out.description = d.replace(/^[^A-Za-z0-9]+/,'');
+  return out;
+}
+
+/* ---------- camera ---------- */
+function camCopy(e){
+  const n = e && e.name;
+  if(n === 'NotAllowedError' || n === 'SecurityError') return 'The camera is blocked. Allow it for this site in your browser settings, or use the camera app link below.';
+  if(n === 'NotFoundError' || n === 'OverconstrainedError') return 'No camera found. Choose a photo instead.';
+  return 'The camera could not start. Use the camera app link below.';
+}
+async function startCamera(){
+  if(S.scanning || S.cam) return;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    setScan('This browser cannot open the camera here. Use the camera app link below.', 'warn');
     return;
   }
-  S.scanning = true; S.ctl = new AbortController();
-  $('#scanBtn').disabled = true; $('#scanStop').hidden = false;
-  setScan('Reading label…');
-  let barcode = '';
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080}}, audio:false});
+    S.cam = stream;
+    const v = $('#camVideo'); v.srcObject = stream; v.hidden = false;
+    try{ await v.play(); }catch(e){}
+    $('#scanImg').hidden = true; $('#scanEmpty').hidden = true;
+    $('#scanBtn').hidden = true; $('#snapBtn').hidden = false; $('#camCancel').hidden = false;
+    setScan('Fill the frame with the label, hold steady, then tap Capture.');
+  }catch(e){
+    S.cam = null;
+    setScan(camCopy(e), 'warn');
+  }
+}
+function stopCamera(){
+  if(S.cam){ S.cam.getTracks().forEach(t => t.stop()); S.cam = null; }
+  const v = $('#camVideo'); v.hidden = true; v.srcObject = null;
+  $('#scanBtn').hidden = false; $('#snapBtn').hidden = true; $('#camCancel').hidden = true;
+  $('#scanImg').hidden = !photoUrl; $('#scanEmpty').hidden = !!photoUrl;
+}
+async function snap(){
+  const v = $('#camVideo');
+  if(!S.cam || !v.videoWidth) return;
+  const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.92));
+  stopCamera();
+  if(!blob){ setScan('Could not capture that. Try again.', 'warn'); return; }
+  handleImage(blob);
+}
+function handleImage(file){
+  showPhoto(file);
+  return readLabel(file);
+}
+
+/* ---------- reading the label ---------- */
+async function detectBarcode(file){
   try{
     if('BarcodeDetector' in window){
       const bmp = await createImageBitmap(file);
       const found = await new BarcodeDetector().detect(bmp);
-      barcode = found.map(x => x.rawValue).filter(Boolean).slice(0,3).join(' | ');
+      return found.map(x => x.rawValue).filter(Boolean).slice(0,3).join(' | ');
     }
   }catch(e){}
+  return '';
+}
+/* put a parsed label into the form; returns how many things were found */
+function applyLabel(out, barcode){
+  const g = k => String((out && out[k]) || '').trim().slice(0,200);
+  S.partId = '';
+  $('#mfr').value = g('manufacturer');
+  $('#partNo').value = g('partNumber');
+  $('#orderNo').value = g('orderNumber');
+  $('#desc').value = g('description');
+  $('#serial').value = g('serial') || (barcode && !g('partNumber') ? barcode.split(' | ')[0] : '');
+  if($('#orderNo').value || $('#serial').value) $('#more').open = true;
+  const got = Array.isArray(out && out.specs) ? out.specs : [];
+  got.forEach(s => {
+    const k = String((s && s.name) || '').trim().slice(0,40), v = String((s && s.value) || '').trim().slice(0,80);
+    if(!k || !v) return;
+    const ex = S.specs.find(x => norm(x.k) === norm(k));
+    if(ex) ex.v = v; else S.specs.push({k:k, v:v});
+  });
+  renderSpecs(); onPartInput(); renderFind();
+  return ['manufacturer','partNumber','orderNumber','description','serial'].filter(k => g(k)).length + got.length;
+}
+async function readLabel(file){
+  S.scanning = true;
+  $('#scanBtn').disabled = true; $('#scanStop').hidden = false;
+  try{
+    if(S.sample && S.imgOk) await readWithClaude(file); else await readWithOcr(file);
+  }finally{
+    S.scanning = false; S.ctl = null; S.ocr.abort = null;
+    $('#scanBtn').disabled = false; $('#scanStop').hidden = true;
+    renderBar();
+  }
+}
+async function readWithClaude(file){
+  S.ctl = new AbortController();
+  $('#ocrRaw').hidden = true;
+  setScan('Reading label…');
+  const barcode = await detectBarcode(file);
   try{
     const out = await S.sample.json(labelPrompt(barcode), {images:file, signal:S.ctl.signal});
-    const g = k => String((out && out[k]) || '').trim().slice(0,200);
-    S.partId = '';
-    $('#mfr').value = g('manufacturer');
-    $('#partNo').value = g('partNumber');
-    $('#orderNo').value = g('orderNumber');
-    $('#desc').value = g('description');
-    $('#serial').value = g('serial') || (barcode && !g('partNumber') ? barcode.split(' | ')[0] : '');
-    if($('#orderNo').value || $('#serial').value) $('#more').open = true;
-    const got = Array.isArray(out && out.specs) ? out.specs : [];
-    got.forEach(s => {
-      const k = String((s && s.name) || '').trim().slice(0,40), v = String((s && s.value) || '').trim().slice(0,80);
-      if(!k || !v) return;
-      const ex = S.specs.find(x => norm(x.k) === norm(k));
-      if(ex) ex.v = v; else S.specs.push({k:k, v:v});
-    });
-    renderSpecs(); onPartInput(); renderFind();
-    const found = ['manufacturer','partNumber','orderNumber','description','serial'].filter(k => g(k)).length + got.length;
+    const found = applyLabel(out, barcode);
     if(!found) setScan('Nothing readable on that photo. Try again closer, or type the details.', 'warn');
     else if(out && out.confidence === 'low') setScan('Read with low confidence. Check each field against the label.', 'warn');
     else setScan('Label read. Check the details match before logging.', 'ok');
   }catch(e){
     if(e && e.code === 'cancelled') setScan('Scan stopped.');
     else setScan(scanCopy(e && e.code), 'warn');
+  }
+}
+
+/* on-device reading with Tesseract.js: the files download once, then the phone does the work */
+const OCR_JS = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+const OCR_LANG = 'https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng@1.0.0/4.0.0_best_int';
+function loadScript(src){
+  return new Promise((res, rej) => {
+    const el = document.createElement('script');
+    el.src = src; el.onload = res; el.onerror = () => rej(new Error('script'));
+    document.head.appendChild(el);
+  });
+}
+async function getOcrWorker(){
+  if(S.ocr.worker) return S.ocr.worker;
+  if(!S.ocr.loading){
+    S.ocr.loading = (async () => {
+      if(!window.Tesseract) await loadScript(OCR_JS);
+      const w = await window.Tesseract.createWorker('eng', 1, {
+        langPath: OCR_LANG,
+        logger: m => { if(S.ocr.onProgress) S.ocr.onProgress(m); }
+      });
+      await w.setParameters({tessedit_pageseg_mode:'11', preserve_interword_spaces:'1'});
+      S.ocr.worker = w;
+      return w;
+    })();
+    S.ocr.loading.then(() => { S.ocr.loading = null; }, () => { S.ocr.loading = null; });
+  }
+  return S.ocr.loading;
+}
+async function loadBitmap(file){
+  if(window.createImageBitmap){ try{ return await createImageBitmap(file); }catch(e){} }
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { URL.revokeObjectURL(url); res(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('image')); };
+    img.src = url;
+  });
+}
+/* shrink, grey, stretch the contrast, and flip light-on-dark plates */
+async function prepImage(file){
+  const bmp = await loadBitmap(file);
+  const w0 = bmp.width, h0 = bmp.height, k = Math.min(1, 2000 / Math.max(w0, h0));
+  const c = document.createElement('canvas'); c.width = Math.round(w0 * k); c.height = Math.round(h0 * k);
+  const g = c.getContext('2d'); g.drawImage(bmp, 0, 0, c.width, c.height);
+  const im = g.getImageData(0, 0, c.width, c.height), d = im.data, hist = new Uint32Array(256);
+  let sum = 0;
+  for(let i = 0; i < d.length; i += 4){
+    const y = (d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114) | 0;
+    d[i] = d[i+1] = d[i+2] = y; hist[y]++; sum += y;
+  }
+  const total = c.width * c.height;
+  let lo = 0, hi = 255, acc = 0;
+  for(let i = 0; i < 256; i++){ acc += hist[i]; if(acc > total * 0.02){ lo = i; break; } }
+  acc = 0;
+  for(let i = 255; i >= 0; i--){ acc += hist[i]; if(acc > total * 0.02){ hi = i; break; } }
+  const invert = sum / total < 110, sc = hi - lo > 30 ? 255 / (hi - lo) : 1, off = hi - lo > 30 ? lo : 0;
+  for(let i = 0; i < d.length; i += 4){
+    let y = Math.max(0, Math.min(255, ((d[i] - off) * sc) | 0));
+    if(invert) y = 255 - y;
+    d[i] = d[i+1] = d[i+2] = y;
+  }
+  g.putImageData(im, 0, 0);
+  return c;
+}
+function ocrCopy(e){
+  if(e && e.message === 'script') return 'The label reader could not download. Check the connection and try again, or type the details. It only downloads once.';
+  return 'Could not read that photo. Take a closer, flatter photo or type the details.';
+}
+async function readWithOcr(file){
+  let stopped = false;
+  S.ocr.abort = () => {
+    stopped = true;
+    if(S.ocr.worker){ try{ S.ocr.worker.terminate(); }catch(e){} S.ocr.worker = null; }
+  };
+  S.ocr.onProgress = m => {
+    if(!m || !m.status || stopped) return;
+    if(m.status === 'recognizing text') setScan('Reading label… ' + Math.round((m.progress || 0) * 100) + '%');
+    else if(/load|initiali/i.test(m.status)) setScan('Loading the label reader. First time only, about 7 MB…');
+  };
+  try{
+    setScan(S.ocr.worker ? 'Reading label…' : 'Loading the label reader. First time only, about 7 MB…');
+    const worker = await getOcrWorker();
+    if(stopped) throw {code:'cancelled'};
+    const canvas = await prepImage(file);
+    const barcode = await detectBarcode(file);
+    if(stopped) throw {code:'cancelled'};
+    setScan('Reading label…');
+    const res = await worker.recognize(canvas);
+    if(stopped) throw {code:'cancelled'};
+    const text = String((res.data && res.data.text) || '');
+    const out = parseLabel(text);
+    const found = applyLabel(out, barcode);
+    $('#ocrText').value = text.trim(); $('#ocrRaw').hidden = !text.trim();
+    const conf = res.data && res.data.confidence;
+    if(!found) setScan('Could not pick out any details. Try again closer and flatter, or use "What the camera read" below.', 'warn');
+    else if(conf < 65) setScan('The photo was hard to read. Check every field against the label.', 'warn');
+    else setScan('Read on this phone. It can misread characters, so check each field against the label.', 'ok');
+  }catch(e){
+    if(stopped || (e && e.code === 'cancelled')) setScan('Scan stopped.');
+    else setScan(ocrCopy(e), 'warn');
   }finally{
-    S.scanning = false; S.ctl = null;
-    $('#scanBtn').disabled = false; $('#scanStop').hidden = true;
-    renderBar();
+    S.ocr.onProgress = null;
   }
 }
 
@@ -1093,10 +1383,19 @@ async function initExtras(){
     try{ const l = await S.sample.limits(); S.imgOk = !!(l && l.images); }catch(e){ S.imgOk = false; }
   }
   if(!S.sample || !S.imgOk){
-    $('#scanBtn').textContent = 'Attach photo';
-    $('.scan-hint').textContent = 'Label reading is not available in this view. Type the part details below.';
+    $('.scan-hint').textContent = 'Fill the frame with the label. It is read on this phone, so check each field afterwards.';
   }
   S.downloads = await use('downloads');
+  if(!S.downloads){
+    S.downloads = {save: async req => {
+      const blob = new Blob([req.data], {type:'text/csv;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = req.filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      return {status:'saved'};
+    }};
+  }
   if(S.view === 'history') renderHistory();
   if(S.view === 'stores') renderStores();
 }
@@ -1255,8 +1554,12 @@ document.addEventListener('click', ev => {
   const act = el.dataset.act, v = el.dataset.v;
   switch(act){
     case 'view': setView(v); break;
-    case 'scan': if(!S.scanning) $('#photo').click(); break;
-    case 'stop': if(S.ctl) S.ctl.abort(); break;
+    case 'scan': startCamera(); break;
+    case 'snap': snap(); break;
+    case 'camcancel': stopCamera(); setScan(''); break;
+    case 'camapp': if(!S.scanning){ stopCamera(); $('#photo').click(); } break;
+    case 'choosephoto': if(!S.scanning){ stopCamera(); $('#photoPick').click(); } break;
+    case 'stop': if(S.ctl) S.ctl.abort(); if(S.ocr.abort) S.ocr.abort(); break;
     case 'source':
       S.source = v; S.reusable = false;
       S.loc = ''; persistPrefs(); renderSource(); renderBar(); break;
@@ -1378,15 +1681,17 @@ $('#needsCheck').addEventListener('change', e => { S.needsCheck = e.target.check
 $('#newMachine').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); addMachine(); } });
 $('#newComp').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); addComponent(); } });
 $('#newSpec').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('#addSpec').querySelector('[data-act="savespec"]').click(); } });
-$('#photo').addEventListener('change', e => {
+['photo','photoPick'].forEach(id => $('#'+id).addEventListener('change', e => {
   const file = e.target.files && e.target.files[0];
   if(!file) return;
-  showPhoto(file);
-  readLabel(file).then(() => { e.target.value = ''; });
-});
+  handleImage(file).then(() => { e.target.value = ''; });
+}));
+document.addEventListener('visibilitychange', () => { if(document.hidden && S.cam) stopCamera(); });
 
 /* ---------- start ---------- */
 renderAll(); renderMode(); renderHistory(); renderStores();
 initStore(); initExtras();
 })();
 </script>
+</body>
+</html>
