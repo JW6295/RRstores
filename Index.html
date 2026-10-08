@@ -1,6 +1,5 @@
-<!doctype html><html><head><meta charset="utf8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><script type='text/javascript' nonce='ZBTaKZyb9i/p2LaH/OBU+g==' src='https://a202a708-a9f2-48ef-b0b2-ddbc8f87c78e.frame.claudeusercontent.com/yWs_FFw7_c2_o_F2IVWXwITNuMduQ-ZZ4dohuo3QC6dYmvJjqRzAQL9XnFTbLV03yPlGTKVfdQXfo9hk2ymzFV4jtLC7WK5g6bJnSNC3bPjZZvXejmpks338px6_Li4nY0FyEDOGEw6G_8pYzpm5rIpA5XIFrR_DMjafpaEdUz4LZ99xaf_5TyLhU6vwZXToWVSY2B7eUcrDaZOxjxIkBDLlhDihP3LSe3yGA7PIO1dDzMnerO1DG2rMuSnFceyE10EYi9je3GJaWQhxQalD0rSzWRQMka4IpLisVdPQUCBok6K-kBUj1XlqM4KmmLuhiUOerlGEdBK1CFr3yNY5dHU8fdNtvDt2YqAkC6TzogFocaHiSv8xZFdYOgsbe11DEAm0Zs58T7sGgmbgaZi6-a1qOa6Cufnw0sQOPNSV-WMOlMjSGdiOrGDMi92nLZ3svDxIqgshgG_HBX4yZWewt-6ltzTSPJQsths0WTd9FdxscJ5llU1O3oELnh0QfNbyRHZbKEIB9fP59m_PdKELlxdhKBcLS3xxoTA-6rljKvf0vEEJ46g5feYmpj-lgP3yt6TccKl67Inl9Po2gfKjlR3n0zzg8Up1J-NSgC0kAA92mpLjWc8V62nnAVXwgMHKw2qUHc07FcWSjNG4h0eRxz95x4yNFKHrQhcveWifnKOU10ThbXN4WfYqNk9tUM2wOFQFm7TnKBR03U3IDx5nvA'></script></head><body>
 <title>Spares Log</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 /* Layout: one narrow column built for a thumb on the shop floor. The label viewfinder is the loudest thing on the page; everything else stays quiet and tappable. */
 :root{
@@ -206,7 +205,7 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
 </header>
 
 <div class="wrap">
-  <p class="banner" id="banner" hidden=""></p>
+  <p class="banner" id="banner" hidden></p>
   <datalist id="areaList"></datalist>
 
   <!-- LOG A PART -->
@@ -220,7 +219,7 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
         <input id="qty" type="number" inputmode="numeric" min="1" max="999" value="1" aria-label="Quantity">
         <button type="button" class="btn" data-act="qty" data-v="1" aria-label="One more">+</button>
       </div>
-      <label class="check" id="reuseRow" for="reusable" hidden=""><input type="checkbox" id="reusable"> Reusable. Put it in the stores.</label>
+      <label class="check" id="reuseRow" for="reusable" hidden><input type="checkbox" id="reusable"> Reusable. Put it in the stores.</label>
     </section>
 
     <section class="sec" id="sec-dept" aria-label="Department">
@@ -231,7 +230,7 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
     <section class="sec" id="sec-machine" aria-label="Machine">
       <div class="lab" id="machineLab">Machine</div>
       <div class="field"><select id="machine" aria-label="Machine"></select></div>
-      <div class="addrow" id="addRow" hidden="">
+      <div class="addrow" id="addRow" hidden>
         <input id="newMachine" placeholder="New machine name" aria-label="New machine name" autocomplete="off" autocapitalize="words">
         <button type="button" class="btn primary" data-act="savemachine">Add</button>
         <button type="button" class="btn" data-act="cancelmachine">Cancel</button>
@@ -242,7 +241,7 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
       <div class="lab">Type of component</div>
       <div class="field"><label for="cat">Category</label><select id="cat"></select></div>
       <div class="field"><label for="item">Component</label><select id="item"></select></div>
-      <div class="field" id="addComp" hidden="">
+      <div class="field" id="addComp" hidden>
         <label for="newComp" id="newCompLab">Add a component</label>
         <div class="addrow">
           <input id="newComp" placeholder="e.g. Thermal overload" autocomplete="off" autocapitalize="sentences">
@@ -250,19 +249,19 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
           <button type="button" class="btn" data-act="cancelcomp">Cancel</button>
         </div>
       </div>
-      <div class="field" id="otherWrap" hidden=""><label for="otherText">Describe the component type</label><input id="otherText" autocomplete="off" placeholder="e.g. Thermal overload"></div>
+      <div class="field" id="otherWrap" hidden><label for="otherText">Describe the component type</label><input id="otherText" autocomplete="off" placeholder="e.g. Thermal overload"></div>
     </section>
 
     <section class="sec" id="sec-part" aria-label="Part details">
       <div class="lab">Part</div>
       <div class="field"><label for="pfind">Find it in the stores list</label><input id="pfind" type="search" placeholder="Search part number, maker, spec" autocomplete="off"></div>
       <div class="find" id="find"></div>
-      <p class="picked" id="picked" hidden=""></p>
+      <p class="picked" id="picked" hidden></p>
 
       <div class="sub">
         <div class="lab">Details <small>scan the label or type them in</small></div>
         <div class="scan-frame" id="scanFrame">
-          <img id="scanImg" alt="Photo of the part label" hidden="">
+          <img id="scanImg" alt="Photo of the part label" hidden>
           <div class="scan-empty" id="scanEmpty">
             <p class="scan-title">Scan part label</p>
             <p class="scan-hint">Fill the frame with the label. Manufacturer, part number and serial are read for you.</p>
@@ -271,10 +270,10 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
         </div>
         <div class="scan-actions">
           <button type="button" class="btn primary" id="scanBtn" data-act="scan">Scan label</button>
-          <button type="button" class="btn" id="scanStop" data-act="stop" hidden="">Stop</button>
+          <button type="button" class="btn" id="scanStop" data-act="stop" hidden>Stop</button>
         </div>
         <p class="status" id="scanStatus" role="status"></p>
-        <input id="photo" type="file" accept="image/*" capture="environment" hidden="">
+        <input id="photo" type="file" accept="image/*" capture="environment" hidden>
 
         <div class="grid">
           <div class="field"><label for="mfr">Manufacturer</label><input id="mfr" autocomplete="off" autocapitalize="words" placeholder="e.g. Siemens"></div>
@@ -293,7 +292,7 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
       <div class="sub">
         <div class="lab">Specification <small>tap to add what is on the label</small></div>
         <div class="field"><select id="specAdd" aria-label="Add a specification"></select></div>
-        <div class="addrow" id="addSpec" hidden="">
+        <div class="addrow" id="addSpec" hidden>
           <input id="newSpec" placeholder="Spec name, e.g. Coil voltage" aria-label="Spec name" autocomplete="off" autocapitalize="sentences">
           <button type="button" class="btn primary" data-act="savespec">Add</button>
           <button type="button" class="btn" data-act="cancelspec">Cancel</button>
@@ -305,7 +304,7 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
     <section class="sec" id="sec-loc" aria-label="Location">
       <div class="lab" id="locLab">Location</div>
       <div id="locs"></div>
-      <div class="addloc" id="addLoc-form" hidden=""></div>
+      <div class="addloc" id="addLoc-form" hidden></div>
     </section>
 
     <section class="sec" aria-label="Job details">
@@ -317,13 +316,13 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
     <div class="bar" id="bar">
       <div class="bar-in">
         <div class="hint" id="hint">Pick a department</div>
-        <button type="button" class="btn primary" id="logBtn" data-act="log" disabled="">Log part</button>
+        <button type="button" class="btn primary" id="logBtn" data-act="log" disabled>Log part</button>
       </div>
     </div>
   </main>
 
   <!-- STORES -->
-  <main id="view-stores" hidden="">
+  <main id="view-stores" hidden>
     <div class="tools">
       <input id="sSearch" type="search" placeholder="Search part number, maker, spec, location" aria-label="Search the stores list" autocomplete="off">
       <select id="afilter" aria-label="Area"></select>
@@ -331,30 +330,30 @@ dl.specs dd{margin:0;overflow-wrap:anywhere}
       <p class="sum" id="ssum"></p>
       <div class="row2">
         <button type="button" class="btn primary" data-act="receive">Add part to stores</button>
-        <button type="button" class="btn" id="exportStock" data-act="exportstock" hidden="">Export stores list</button>
+        <button type="button" class="btn" id="exportStock" data-act="exportstock" hidden>Export stores list</button>
       </div>
     </div>
     <div id="plist"></div>
   </main>
 
   <!-- HISTORY -->
-  <main id="view-history" hidden="">
+  <main id="view-history" hidden>
     <div class="tools">
       <input id="hq" type="search" placeholder="Search part number, machine, location, description" aria-label="Search the log" autocomplete="off">
       <div class="seg" id="hfilter"></div>
       <p class="sum" id="sum"></p>
-      <button type="button" class="btn" id="exportBtn" data-act="export" hidden="">Export CSV</button>
+      <button type="button" class="btn" id="exportBtn" data-act="export" hidden>Export CSV</button>
     </div>
     <div id="list"></div>
   </main>
 </div>
 
-<div class="scrim" id="scrim" hidden="">
+<div class="scrim" id="scrim" hidden>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <div id="sheetBody"></div>
   </div>
 </div>
-<div class="toast" id="toast" role="status" aria-live="polite" hidden=""></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
 (function(){
@@ -1391,5 +1390,3 @@ renderAll(); renderMode(); renderHistory(); renderStores();
 initStore(); initExtras();
 })();
 </script>
-
-</body></html>
