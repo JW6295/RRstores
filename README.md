@@ -16,7 +16,19 @@ The Scan label button opens the phone camera inside the page. Tap Capture and th
 
 ## Where data is kept
 
-Entries, the stores list and stock counts are saved in the browser on each phone. They are not shared between phones. When the page is opened as a Claude artifact instead, it uses Claude's shared storage so everyone sees the same log.
+- **Shared team log (Supabase):** once set up below, everyone using the page sees the same log, stores list, stock counts, machines and locations. Phones refresh every few seconds. With no signal, entries are kept on the phone and upload when it reconnects.
+- **Without Supabase:** entries stay on each phone only.
+- **As a Claude artifact:** uses Claude's own shared storage instead.
+
+## Set up the shared log (about 10 minutes, free)
+
+1. Create a free project at supabase.com.
+2. Open `schema.sql` from this repo, change `CHANGE-ME-PASSCODE` (it appears twice) to a team passcode, then paste the whole file into Supabase, SQL Editor, New query, and press Run.
+3. In Supabase go to Project Settings, API. Copy the Project URL and the `anon` public key.
+4. In `index.html`, find `const SUPABASE = {url:'', key:''};` and put those two values in the quotes. Commit.
+5. Open the page on each phone. It asks for the passcode and the person's name once, then remembers them.
+
+The passcode stops anyone without it reading or writing the data. It is not strong security, so don't keep anything sensitive in the log. Supabase pauses free projects after a week with no use, so open it now and then or upgrade if it matters.
 
 ## Publish on GitHub Pages
 

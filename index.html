@@ -696,6 +696,7 @@ function renderMode(){
   const b = $('#banner');
   let msg = S.error;
   if(!msg && S.mode === 'local') msg = 'Saved on this phone only. Other phones will not see these entries.';
+  if(!msg && S.mode === 'shared' && S.offline) msg = 'No connection. Entries are kept on this phone and will upload when it reconnects.';
   b.hidden = !msg; b.textContent = msg || '';
 }
 
@@ -1323,6 +1324,109 @@ function makeLocalStore(){
     sub:(c, cb) => { (cbs[c] = cbs[c] || []).push(cb); cb(rows(c)); }
   };
 }
+/* Shared team log on Supabase (plain REST, no library). Fill in SUPABASE below; see README. */
+const SUPABASE = {url:'', key:''};
+function makeTeamStore(cfg){
+  const base = cfg.url.replace(/\/+$/,'') + '/rest/v1/docs';
+  const cacheKey = 'spares-log-team-v1', outKey = 'spares-log-outbox-v1';
+  let code = LS.get('spares-log-team-code', '');
+  const cache = LS.get(cacheKey, {});          /* {collection:{id:data}} last known server state */
+  let outbox = LS.get(outKey, []);              /* writes not yet confirmed by the server */
+  const cbs = {}, queries = {};
+  const rows = c => Object.keys(cache[c] || {}).map(id => Object.assign({id:id}, cache[c][id]));
+  const emit = c => (cbs[c] || []).forEach(f => f(rows(c)));
+  const saveOut = () => LS.set(outKey, outbox);
+  const saveCache = () => LS.set(cacheKey, cache);
+  const err = (code2, status) => { const e = new Error(code2); e.code = code2; e.status = status; return e; };
+  const apply = op => {
+    if(op.t === 'set') (cache[op.c] = cache[op.c] || {})[op.id] = op.d;
+    else if(cache[op.c]) delete cache[op.c][op.id];
+  };
+
+  async function call(path, opts){
+    if(!code) code = askCode();
+    const h = Object.assign({apikey:cfg.key, Authorization:'Bearer ' + cfg.key, 'x-team-code':code, 'Content-Type':'application/json'}, (opts && opts.headers) || {});
+    let r;
+    try{ r = await fetch(base + path, Object.assign({}, opts, {headers:h})); }
+    catch(e){ throw err('offline', 0); }
+    if(r.status === 401 || r.status === 403){ LS.set('spares-log-team-code', ''); code = ''; throw err('code', r.status); }
+    if(!r.ok) throw err('server', r.status);
+    return r.status === 204 ? null : r.text().then(t => t ? JSON.parse(t) : null);
+  }
+  function askCode(){
+    const c = (window.prompt('Enter the team passcode for the shared spares log') || '').trim();
+    if(c) LS.set('spares-log-team-code', c);
+    return c;
+  }
+  let flushing = false;
+  async function flush(){
+    if(flushing) return; flushing = true;
+    try{
+      while(outbox.length){
+        const op = outbox[0];
+        if(op.t === 'set'){
+          await call('?on_conflict=collection,id', {method:'POST', headers:{Prefer:'resolution=merge-duplicates,return=minimal'},
+            body:JSON.stringify([{collection:op.c, id:op.id, data:op.d, ts:Number(op.d && op.d.ts) || Date.now()}])});
+        }else{
+          await call('?collection=eq.' + encodeURIComponent(op.c) + '&id=eq.' + encodeURIComponent(op.id), {method:'DELETE'});
+        }
+        outbox.shift(); saveOut();
+      }
+    } finally { flushing = false; }
+  }
+  let polling = false, seeded = false;
+  async function poll(){
+    if(polling) return; polling = true;
+    try{
+      await flush();
+      const names = Object.keys(cbs);
+      const jobs = names.map(c => {
+        const q = queries[c];
+        const path = '?select=id,data&collection=eq.' + encodeURIComponent(c) + (q && q.order ? '&order=ts.' + (q.dir || 'asc') : '') + (q && q.limit ? '&limit=' + q.limit : '');
+        return call(path).then(list => ({c:c, list:list || []}));
+      });
+      const results = await Promise.all(jobs);
+      if(outbox.length) return;                 /* a save is waiting; do not overwrite it with older server data */
+      results.forEach(res => {
+        const next = {}; res.list.forEach(r => { next[r.id] = r.data; });
+        if(JSON.stringify(next) !== JSON.stringify(cache[res.c] || {})){ cache[res.c] = next; emit(res.c); }
+      });
+      saveCache(); setNet(true);
+      if(!seeded){                               /* brand-new database: add the starter machines and locations once */
+        seeded = true;
+        const m = results.find(r => r.c === 'machines'), l = results.find(r => r.c === 'locations');
+        if(m && !m.list.length) ['Hermle','WFL','Heyligenstaedt'].forEach(n => write({t:'set', c:'machines', id:slug(n), d:{name:n, ts:Date.now()}}));
+        if(l && !l.list.length) SEED_LOCS.forEach(([a,n]) => write({t:'set', c:'locations', id:slug(a + '-' + n), d:{area:a, name:n, ts:Date.now()}}));
+      }
+    }catch(e){
+      if(e.code === 'code'){ S.error = 'Wrong or missing team passcode. Reload the page to enter it again.'; renderMode(); }
+      else setNet(false);
+    }finally{ polling = false; }
+  }
+  function setNet(ok){
+    const was = S.offline; S.offline = !ok || outbox.length > 0;
+    if(S.error && ok && S.error.indexOf('passcode') < 0){ S.error = ''; }
+    if(was !== S.offline) renderMode();
+  }
+  async function write(op){
+    outbox.push(op); saveOut(); apply(op); saveCache(); emit(op.c);
+    try{ await flush(); setNet(true); }
+    catch(e){
+      if(e.code === 'code'){ throw e; }
+      setNet(false);                             /* offline or server trouble: it stays queued and retries */
+    }
+  }
+  const timer = setInterval(() => { if(!document.hidden) poll(); }, 6000);
+  document.addEventListener('visibilitychange', () => { if(!document.hidden) poll(); });
+  window.addEventListener('online', poll);
+  if(!code) code = askCode();
+  return {
+    set:(c, id, d) => write({t:'set', c:c, id:id, d:JSON.parse(JSON.stringify(d))}),
+    add:(c, d) => write({t:'set', c:c, id:'l' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), d:JSON.parse(JSON.stringify(d))}),
+    del:(c, id) => write({t:'del', c:c, id:id}),
+    sub:(c, cb, q) => { (cbs[c] = cbs[c] || []).push(cb); queries[c] = q; cb(rows(c)); setTimeout(poll, 0); }
+  };
+}
 async function resolveNames(){
   if(!S.user) return;
   const ids = Array.from(new Set(S.logs.map(e => e.by).filter(Boolean)));
@@ -1344,8 +1448,20 @@ async function initStore(){
       if(can === false) S.canWrite = false;
     }catch(e){}
   }
-  S.mode = db ? 'shared' : 'local';
-  store = db ? makeDbStore(db) : makeLocalStore();
+  const team = !db && SUPABASE.url && SUPABASE.key;
+  S.mode = (db || team) ? 'shared' : 'local';
+  if(db) store = makeDbStore(db);
+  else if(team){
+    /* no accounts here, so each person is identified by the name they give on this phone */
+    let who = LS.get('spares-log-name', '');
+    if(!who){
+      who = (window.prompt('Your name, so entries show who took each part') || '').trim().replace(/\s+/g,' ').slice(0, 40);
+      if(who) LS.set('spares-log-name', who);
+    }
+    S.uid = who || 'Unknown'; S.teamNames = true;
+    store = makeTeamStore(SUPABASE);
+  }
+  else store = makeLocalStore();
 
   store.sub('machines', rows => {
     S.machines = rows.map(r => ({id:r.id, name:String(r.name || r.id)})).sort((a,b) => a.name.localeCompare(b.name));
@@ -1372,6 +1488,7 @@ async function initStore(){
   store.sub('logs', rows => {
     S.logs = rows.slice().sort((a,b) => (b.ts || 0) - (a.ts || 0)).slice(0, 300);
     S.logsLoaded = true;
+    if(S.teamNames) S.logs.forEach(e => { if(e.by) S.names[e.by] = e.by; });
     renderHistory(); resolveNames();
   }, {order:'ts', dir:'desc', limit:300});
   renderMode(); renderBar();
